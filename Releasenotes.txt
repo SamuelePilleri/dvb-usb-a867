@@ -1,0 +1,171 @@
+===================================================================================
+   
+    AVerMedia Driver Release Notes v1.0.26
+
+    For: A867
+
+===================================================================================
+
+0. License
+
+    This driver is released under the GNU GENERAL PUBLIC LICENSE Version 2.
+    Please read "LICENSE" file for detailed information.
+
+1. Compile Driver
+
+    To compile the driver against running kernel, simply invoke "make" in the source
+    code directory. Please make sure the build environment is prepared for an
+    out-of-tree module compilation. To do this, check the following folders:
+
+    $ ls -al /lib/modules/`uname -r`/build
+    $ ls -al /lib/modules/`uname -r`/source
+
+    The source folder must contain kernel source code for driver to compile.
+
+2. Load Driver
+
+	1.1 Manually load driver
+
+		load:
+		step1. get the root previlege
+		step2. modprobe dvb-core dvb-pll dvb-usb
+		step3. insmod a333.ko
+
+	1.2 Install driver to system
+		
+		step1. get the root previlege
+		step2. copy a333.ko to /lib/modules/2.6.28-11-generic/kernel/drivers/media/dvb/
+		step2. depmod -a	
+
+3. Change Log
+
+----------------------
+v1.0.26 -  2010/05/05
+----------------------
+- Update firmware.h & Maxlinear_MXL5007_Script.h for debug register 0x67
+
+
+----------------------
+v1.0.25 -  2010/04/28
+----------------------
+- Update firmware for debug register 0x67
+
+
+----------------------
+v1.0.24 -  2010/03/12
+----------------------
+- Update firmware again for fixing the issue "tuner failing to lock to valid signal"
+
+
+----------------------
+v1.0.23 -  2010/03/11
+----------------------
+- Update firmware and tuner script again for fixing the issue "tuner failing to lock to valid signal"
+
+
+----------------------
+v1.0.22 -  2010/03/09
+----------------------
+- Update firmware and tuner script for fixing the issue "tuner failing to lock to valid signal"
+
+
+----------------------
+v1.0.21 - 
+----------------------
+- Test release
+
+----------------------
+v1.0.20 -  2010/02/23
+----------------------
+- Update firmware for fixing pid filter issue. It also improves channel lock issue.
+
+
+----------------------
+v1.0.19 -  2010/01/28
+----------------------
+- Change the CCI parameters of the tuner script to the same as v1.0.17, in order to eliminate false CCI detection.
+
+
+----------------------
+v1.0.18 -  2010/01/26
+----------------------
+- Update firmware version from v8.8.13.2 to v8.8.13.3 for improving demodulator performance under CCI.
+- Replace the firmware related files ( firmware.h  Maxlinear_MXL5007_Script.h variable.h).
+
+
+----------------------
+v1.0.17 -  2010/01/25
+----------------------
+- Give FW the version v8.8.13.2
+
+
+----------------------
+v1.0.16 -  2010/01/23
+----------------------
+- Update firmware.h Maxlinear_MXL5007_Script.h variable.h. Version is yet to be sync with ITE.
+
+
+----------------------
+v1.0.14 -  2009/12/30
+----------------------
+- Replace the firmware related files "variable.h" for F/W v8.8.13.1
+
+
+----------------------
+v1.0.13 -  2009/12/24
+----------------------
+- Update firmware from v8.8.63.3 to v8.8.13.1 and MXL5007 tuner script for fixing macro block issue in Rome
+- Replace the firmware related files ( firmware.h  Maxlinear_MXL5007_Script.h )
+
+-----------------------
+v1.0.11 -  2009/11/8
+-----------------------
+- Update firmware v8.8.63.2 to v8.8.63.3 for PID filter issue
+- Set "minimal packet length" register for zero length packet issue
+
+-----------------------
+v1.0.10 -  2009/11/4
+-----------------------
+- Add SNR Mapping function
+- Rewrite HW PID filtering sequence
+
+-----------------------
+v1.0.9  -  2009/11/3
+-----------------------
+- Replace the firmware from version V8.8.63.1 to V8.8.63.2 ( firmware.h ) 
+- Try to avoid zero length packet
+
+-----------------------
+v1.0.8  -  2009/10/31
+-----------------------
+- Replace the firmware related files ( firmware.h  variable.h  Maxlinear_MXL5007_Script.h )
+- Change the transfer size from (188*512) to (188*44) bytes
+
+-----------------------
+v1.0.7  -  2009/10/29
+-----------------------
+- Support read strength data
+- Support LED control
+
+-----------------------
+v1.0.6  -  2009/10/23
+-----------------------
+- Support read SNR data for table look up
+
+-----------------------
+v1.0.5  -  2009/10/08
+-----------------------
+- Work around for HW pid filter
+
+-----------------------
+v1.0.4  -  2009/10/05
+-----------------------
+- Enable HW PID filter by default
+- Source code release
+
+-----------------------
+v1.0.3  -  2009/06/10
+-----------------------
+- Support A867 (MxL 5007 tuner)
+- Enable HW PID filter
+- The relase is only for Ubuntu 9.04 native kernel
