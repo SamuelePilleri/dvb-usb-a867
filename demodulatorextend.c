@@ -10,34 +10,7 @@
 #include "usb2impl.h"
 #include "cmd.h"
 
-#include "Afa_AF9007.h"
-
-/*#include "Afa_PEACOCK.h"
-
-#include "Freescale_MC44CD02.h"
-
-#include "Integrant_ITD3020.h"
-
-#include "Maxlinear_MXL5005.h"
-
-#include "Microtune_MT2260B0.h"
-*/
-#include "Microtune_MT2266.h"
-/*
-#include "Panasonic_ENV77H11D5.h"
-
-#include "Philips_TD1316AFIHP.h"
-*/
-#include "Philips_TDA18291HN.h"
-
-/*
-#include "Xceive_XC3028L.h"
-*/
-#include "Infineon_TUA9001.h"
-
-#include "Fitipower_FC0011.h"
-
-#include "Maxlinear_MXL5007.h"	//j002
+#include "Maxlinear_MXL5007.h"
 
 static PidInfo pidInfo;
 BusDescription busDesc[] =
