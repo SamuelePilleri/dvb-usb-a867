@@ -64,16 +64,7 @@ MODULE_PARM_DESC(debug, "set debug level");
 
 
 
-enum mxl5007t_chip_version {
-	MxL_UNKNOWN_ID     = 0x00,
-	MxL_5007_V1_F1     = 0x11,
-	MxL_5007_V1_F2     = 0x12,
-	MxL_5007_V4        = 0x14,
-	MxL_5007_V2_100_F1 = 0x21,
-	MxL_5007_V2_100_F2 = 0x22,
-	MxL_5007_V2_200_F1 = 0x23,
-	MxL_5007_V2_200_F2 = 0x24,
-};
+
 
 struct reg_pair_t {
 	u8 reg;

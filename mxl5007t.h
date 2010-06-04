@@ -81,6 +81,17 @@ enum mxl5007t_bw_mhz {
 };
 
 struct mxl5007t_config;
+enum mxl5007t_chip_version {
+	MxL_UNKNOWN_ID     = 0x00,
+	MxL_5007_V1_F1     = 0x11,
+	MxL_5007_V1_F2     = 0x12,
+	MxL_5007_V4        = 0x14,
+	MxL_5007_V2_100_F1 = 0x21,
+	MxL_5007_V2_100_F2 = 0x22,
+	MxL_5007_V2_200_F1 = 0x23,
+	MxL_5007_V2_200_F2 = 0x24,
+};
+
 struct mxl5007t_state {
 	struct mutex lock;
 	struct mxl5007t_config *cfg;
@@ -96,7 +107,7 @@ struct mxl5007t_config {
 	Demodulator*	demodulator;	//AF9035 instance //todo include
 	Byte			chip;			//AF9035 instance
 	Byte			I2C_Addr;
-	mxl5007t_mode	Mode;
+	enum mxl5007t_mode	Mode;
 	struct mxl5007t_state *state;
 	s32 if_diff_out_level;
 	enum mxl5007t_clkout_amp clk_out_amp;
