@@ -256,58 +256,15 @@ Dword Demodulator_setBusTuner (
     Dword error = Error_NO_ERROR;
 
     Ganymede* ganymede;
-
     ganymede = (Ganymede*) demodulator;
-
     ganymede->cmdDescription = &cmdDesc[busId];
     ganymede->busId = busId;
 
-	switch(tunerId)
-	{
-	case Tuner_Afatech_AF9007:
-		ganymede->tunerDescription = &tuner_AF9007;
-		break;
-/*	case Tuner_Panasonic_ENV77H11D5:
-		ganymede->tunerDescription = &tuner_ENV77H11D5;
-		break;
-	case Tuner_Philip_TD1316AFIHP:
-		ganymede->tunerDescription = &tuner_TD1316AFIHP;
-		break;
-	case Tuner_Maxlinear_MXL5005:
-		ganymede->tunerDescription = &tuner_MXL5005;
-		break;
-	case Tuner_Freescale_MC44CD02:
-		ganymede->tunerDescription = &tuner_MC44CD02;
-		break;
-	case Tuner_Microtune_MT2260B0:
-		ganymede->tunerDescription = &tuner_MT2260B0;
-		break;
-*/	case Tuner_Philips_TDA18291HN:
-		ganymede->tunerDescription = &tuner_TDA18291;
-		break;
-	case Tuner_Microtune_MT2266:
-		ganymede->tunerDescription = &tuner_MT2266;
-		break;
-/*	case Tuner_Integrant_ITD3020:
-		ganymede->tunerDescription = &tuner_ITD3020;
-		break;
-	case Tuner_Afatech_PEACOCK:
-		ganymede->tunerDescription = &tuner_PEACOCK;
-		break;
-	//case Tuner_Xceive_XC3028L:
-	//	ganymede->tunerDescription = &tuner_XC3028L;
-	//	break;
-*/	case Tuner_Infineon_TUA9001:
-		ganymede->tunerDescription = &tuner_TUA9001;
-		break;
-	case Tuner_Fitipower_FC0011:
-		ganymede->tunerDescription = &tuner_FC0011;
-		break;
-//j002+s
+	switch(tunerId) {
 	case Tuner_Maxlinear_MXL5007:
 		ganymede->tunerDescription = &tuner_MXL5007;
 		break;
-//j002+e
+
 	default:
 		error = Error_INVALID_TUNER_TYPE;
 		goto exit;
@@ -322,6 +279,7 @@ Dword Demodulator_setBusTuner (
 exit:
     return(error);
 }
+
 Dword Demodulator_getChannelStatistic (
     IN  Demodulator*            demodulator,
     IN  Byte                    chip,

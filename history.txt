@@ -1,4 +1,4 @@
-A333 EVB driver
+A867 init from a333_evb1 on 2010/06/03
 
 ===================
 Log

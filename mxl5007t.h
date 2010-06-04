@@ -16,12 +16,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * =============> modified from that in linux-2.6.34
  */
 
 #ifndef __MXL5007T_H__
 #define __MXL5007T_H__
-
-#include "dvb_frontend.h"
 
 /* ------------------------------------------------------------------------- */
 
@@ -67,7 +67,37 @@ enum mxl5007t_clkout_amp {
 	MxL_CLKOUT_AMP_0_15V = 7,
 };
 
+enum mxl5007t_mode {
+	MxL_MODE_ISDBT     =    0,
+	MxL_MODE_DVBT      =    1,
+	MxL_MODE_ATSC      =    2,
+	MxL_MODE_CABLE     = 0x10,
+};
+
+enum mxl5007t_bw_mhz {
+	MxL_BW_6MHz = 6,
+	MxL_BW_7MHz = 7,
+	MxL_BW_8MHz = 8,
+};
+
+struct mxl5007t_config;
+struct mxl5007t_state {
+	struct mutex lock;
+	struct mxl5007t_config *cfg;
+	enum mxl5007t_chip_version chip_id;
+	struct reg_pair_t *tab_init;
+	struct reg_pair_t *tab_init_cable;
+	struct reg_pair_t *tab_rftune;
+	u32 frequency;
+	u32 bandwidth;
+};
+
 struct mxl5007t_config {
+	Demodulator*	demodulator;	//AF9035 instance //todo include
+	Byte			chip;			//AF9035 instance
+	Byte			I2C_Addr;
+	mxl5007t_mode	Mode;
+	struct mxl5007t_state *state;
 	s32 if_diff_out_level;
 	enum mxl5007t_clkout_amp clk_out_amp;
 	enum mxl5007t_xtal_freq xtal_freq_hz;
@@ -77,20 +107,7 @@ struct mxl5007t_config {
 	unsigned int clk_out_enable:1;
 };
 
-#if defined(CONFIG_MEDIA_TUNER_MXL5007T) || (defined(CONFIG_MEDIA_TUNER_MXL5007T_MODULE) && defined(MODULE))
-extern struct dvb_frontend *mxl5007t_attach(struct dvb_frontend *fe,
-					    struct i2c_adapter *i2c, u8 addr,
-					    struct mxl5007t_config *cfg);
-#else
-static inline struct dvb_frontend *mxl5007t_attach(struct dvb_frontend *fe,
-						   struct i2c_adapter *i2c,
-						   u8 addr,
-						   struct mxl5007t_config *cfg)
-{
-	printk(KERN_WARNING "%s: driver disabled by Kconfig\n", __func__);
-	return NULL;
-}
-#endif
+extern void mxl5007t_attach(struct mxl5007t_config *cfg);
 
 #endif /* __MXL5007T_H__ */
 

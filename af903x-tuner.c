@@ -89,4 +89,4 @@ struct dvb_frontend * tuner_attach(struct dvb_frontend *fe)
 	
 	return fe;
 }
-//s012 EXPORT_SYMBOL(tuner_attach);
+
