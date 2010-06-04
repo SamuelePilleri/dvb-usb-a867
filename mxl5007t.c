@@ -529,7 +529,7 @@ fail:
 
 /* ------------------------------------------------------------------------- */
 
-int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq)
+int a867_mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq)
 {
 	int ret;
 
@@ -591,7 +591,7 @@ static int mxl5007t_get_bandwidth(struct mxl5007t_state *state, u32 *bandwidth)
 	return 0;
 }
 
-void mxl5007t_release(struct mxl5007t_state *state)
+void a867_mxl5007t_release(struct mxl5007t_state *state)
 {
 	if( state ) {
 		state->config->state = NULL;
@@ -645,7 +645,7 @@ fail:
 }
 
 
-void mxl5007t_attach(struct mxl5007t_config *cfg)
+void a867_mxl5007t_attach(struct mxl5007t_config *cfg)
 {
 	struct mxl5007t_state *state;
 	int instance, ret;
@@ -661,7 +661,7 @@ void mxl5007t_attach(struct mxl5007t_config *cfg)
 	/* check return value of mxl5007t_get_chip_id */
 	if (mxl_fail(ret)) {
 		//show something
-		mxl5007t_release(state);
+		a867_mxl5007t_release(state);
 		return;
 	}
 

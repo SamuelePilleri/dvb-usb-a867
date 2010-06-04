@@ -119,9 +119,9 @@ struct mxl5007t_config {
 	unsigned int clk_out_enable:1;
 };
 
-extern void mxl5007t_attach(struct mxl5007t_config *cfg);
-extern void mxl5007t_release(struct mxl5007t_state *state);
-extern int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq);
+extern void a867_mxl5007t_attach(struct mxl5007t_config *cfg);
+extern void a867_mxl5007t_release(struct mxl5007t_state *state);
+extern int a867_mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq);
 
 #endif /* __MXL5007T_H__ */
 
