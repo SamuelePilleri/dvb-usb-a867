@@ -94,7 +94,7 @@ enum mxl5007t_chip_version {
 
 struct mxl5007t_state {
 	struct mutex lock;
-	struct mxl5007t_config *cfg;
+	struct mxl5007t_config *config;
 	enum mxl5007t_chip_version chip_id;
 	struct reg_pair_t *tab_init;
 	struct reg_pair_t *tab_init_cable;
@@ -102,11 +102,11 @@ struct mxl5007t_state {
 	u32 frequency;
 	u32 bandwidth;
 };
-
+struct Demodulator;
 struct mxl5007t_config {
-	Demodulator*	demodulator;	//AF9035 instance //todo include
-	Byte			chip;			//AF9035 instance
-	Byte			I2C_Addr;
+	struct Demodulator*	demodulator;	//AF9035 instance //todo include
+	unsigned char			chip;			//AF9035 instance
+	unsigned char			I2C_Addr;
 	enum mxl5007t_mode	Mode;
 	struct mxl5007t_state *state;
 	s32 if_diff_out_level;

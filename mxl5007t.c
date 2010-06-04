@@ -21,7 +21,6 @@
 #include <linux/i2c.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
-#include "tuner-i2c.h"
 #include "mxl5007t.h"
 
 static int mxl5007t_debug;
@@ -63,7 +62,7 @@ MODULE_PARM_DESC(debug, "set debug level");
 #define MHz 1000000
 
 
-
+#include "Maxlinear_MXL5007.h"
 
 
 struct reg_pair_t {
@@ -419,7 +418,7 @@ reg_pair_t *mxl5007t_calc_rf_tune_regs(struct mxl5007t_state *state,
 static int mxl5007t_write_reg(struct mxl5007t_state *state, u8 reg, u8 val)
 {
 	u8 buf[] = { reg, val };
-	int ret = MxL_I2C_Write(state->I2C_Addr, buf, 2, state->cfg);
+	int ret = MxL_I2C_Write(state->config->I2C_Addr, buf, 2, state->config);
 	if (ret) {
 		mxl_err("failed!");
 		return -EREMOTEIO;
@@ -444,7 +443,7 @@ static int mxl5007t_write_regs(struct mxl5007t_state *state,
 
 static int mxl5007t_read_reg(struct mxl5007t_state *state, u8 reg, u8 *val)
 {
-	int ret = MxL_I2C_Read(state->I2C_Addr, reg, val, state->cfg);
+	int ret = MxL_I2C_Read(state->config->I2C_Addr, reg, val, state->config);
 
 	if (ret) {
 		mxl_err("failed!");
