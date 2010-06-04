@@ -23,6 +23,7 @@
 #ifndef __MXL5007T_H__
 #define __MXL5007T_H__
 
+#include "type.h"
 /* ------------------------------------------------------------------------- */
 
 enum mxl5007t_if_freq {
@@ -102,9 +103,9 @@ struct mxl5007t_state {
 	u32 frequency;
 	u32 bandwidth;
 };
-struct Demodulator;
+
 struct mxl5007t_config {
-	struct Demodulator*	demodulator;	//AF9035 instance //todo include
+	Demodulator*	demodulator;	//AF9035 instance //todo include
 	unsigned char			chip;			//AF9035 instance
 	unsigned char			I2C_Addr;
 	enum mxl5007t_mode	Mode;
@@ -119,6 +120,8 @@ struct mxl5007t_config {
 };
 
 extern void mxl5007t_attach(struct mxl5007t_config *cfg);
+extern void mxl5007t_release(struct mxl5007t_state *state);
+extern int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq);
 
 #endif /* __MXL5007T_H__ */
 

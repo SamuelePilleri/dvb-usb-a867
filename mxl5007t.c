@@ -529,7 +529,7 @@ fail:
 
 /* ------------------------------------------------------------------------- */
 
-static int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq)
+int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq)
 {
 	int ret;
 
