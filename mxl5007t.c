@@ -23,10 +23,6 @@
 #include <linux/videodev2.h>
 #include "mxl5007t.h"
 
-static int mxl5007t_debug;
-module_param_named(debug, mxl5007t_debug, int, 0644);
-MODULE_PARM_DESC(debug, "set debug level");
-
 /* ------------------------------------------------------------------------- */
 
 #define mxl_printk(kern, fmt, arg...) \

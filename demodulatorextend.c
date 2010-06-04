@@ -232,6 +232,7 @@ Dword Demodulator_setBusTuner (
     ganymede = (Ganymede*) demodulator;
     ganymede->cmdDescription = &cmdDesc[busId];
     ganymede->busId = busId;
+    if( 0xff==tunerId ) tunerId = Tuner_Maxlinear_MXL5007; //todo ??
 
 	switch(tunerId) {
 	case Tuner_Maxlinear_MXL5007:
