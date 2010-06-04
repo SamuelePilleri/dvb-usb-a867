@@ -455,17 +455,13 @@ static int mxl5007t_read_reg(struct mxl5007t_state *state, u8 reg, u8 *val)
 static int mxl5007t_soft_reset(struct mxl5007t_state *state)
 {
 	u8 d = 0xff;
-	struct i2c_msg msg = {
-		.addr = state->i2c_props.addr, .flags = 0,
-		.buf = &d, .len = 1
-	};
-	int ret = i2c_transfer(state->i2c_props.adap, &msg, 1);
-
-	if (ret != 1) {
+	
+	int ret = MxL_I2C_Write(state->config->I2C_Addr, &d, 1, state->config);
+	if (ret) {
 		mxl_err("failed!");
 		return -EREMOTEIO;
 	}
-	return 0;
+	return ret;
 }
 
 static int mxl5007t_tuner_init(struct mxl5007t_state *state,
@@ -530,36 +526,16 @@ fail:
 	return ret;
 }
 
-/* ------------------------------------------------------------------------- */
-
-static int mxl5007t_get_status(struct mxl5007t_state *state, u32 *status)
-{
-	int rf_locked, ref_locked, ret;
-
-	*status = 0;
-
-	ret = mxl5007t_synth_lock_status(state, &rf_locked, &ref_locked);
-	if (mxl_fail(ret))
-		goto fail;
-	mxl_debug("%s%s", rf_locked ? "rf locked " : "",
-		  ref_locked ? "ref locked" : "");
-
-	if ((rf_locked) || (ref_locked))
-		*status |= TUNER_STATUS_LOCKED;
-fail:
-
-	return ret;
-}
 
 /* ------------------------------------------------------------------------- */
 
-static int mxl5007t_set_params(struct mxl5007t_state *state, mxl5007t_bw_mhz bw, u32 freq)
+static int mxl5007t_set_params(struct mxl5007t_state *state, enum mxl5007t_bw_mhz bw, u32 freq)
 {
 	int ret;
 
 	mutex_lock(&state->lock);
 
-	ret = mxl5007t_tuner_init(state, state->cfg->Mode);
+	ret = mxl5007t_tuner_init(state, state->config->Mode);
 	if (mxl_fail(ret))
 		goto fail;
 
@@ -618,7 +594,7 @@ static int mxl5007t_get_bandwidth(struct mxl5007t_state *state, u32 *bandwidth)
 void mxl5007t_release(struct mxl5007t_state *state)
 {
 	if( state ) {
-		state->cfg->state = NULL;
+		state->config->state = NULL;
 		kfree(state);
 	}
 }
@@ -675,7 +651,7 @@ void mxl5007t_attach(struct mxl5007t_config *cfg)
 	int instance, ret;
 
 	state = kzalloc(sizeof(struct mxl5007t_state), GFP_KERNEL);
-	if( state == NULL ) return NULL;
+	if( state == NULL ) return;
 
 	state->config = cfg;
 
