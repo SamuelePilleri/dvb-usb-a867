@@ -39,7 +39,7 @@
 
 #define mxl_debug(fmt, arg...)				\
 ({							\
-	if (mxl5007t_debug)				\
+	if (1)				\
 		mxl_printk(KERN_DEBUG, fmt, ##arg);	\
 })
 
@@ -325,8 +325,8 @@ static struct reg_pair_t *mxl5007t_calc_init_regs(struct mxl5007t_state *state,
 {
 	struct mxl5007t_config *cfg = state->config;
 
-	memcpy(&state->tab_init, &init_tab, sizeof(init_tab));
-	memcpy(&state->tab_init_cable, &init_tab_cable, sizeof(init_tab_cable));
+	memcpy(state->tab_init, init_tab, sizeof(init_tab));
+	memcpy(state->tab_init_cable, init_tab_cable, sizeof(init_tab_cable));
 
 	mxl5007t_set_mode_bits(state, mode, cfg->if_diff_out_level);
 	mxl5007t_set_if_freq_bits(state, cfg->if_freq_hz, cfg->invert_if);
@@ -377,7 +377,7 @@ reg_pair_t *mxl5007t_calc_rf_tune_regs(struct mxl5007t_state *state,
 	u32 frac_divider = 1000000;
 	unsigned int i;
 
-	memcpy(&state->tab_rftune, &reg_pair_rftune, sizeof(reg_pair_rftune));
+	memcpy(state->tab_rftune, reg_pair_rftune, sizeof(reg_pair_rftune));
 
 	mxl5007t_set_bw_bits(state, bw);
 
@@ -431,9 +431,10 @@ static int mxl5007t_write_regs(struct mxl5007t_state *state,
 
 	while ((ret == 0) && (reg_pair[i].reg || reg_pair[i].val)) {
 		ret = mxl5007t_write_reg(state,
-					 reg_pair[i].reg, reg_pair[i].val);
+		reg_pair[i].reg, reg_pair[i].val);
 		i++;
 	}
+
 	return ret;
 }
 
@@ -590,6 +591,9 @@ static int mxl5007t_get_bandwidth(struct mxl5007t_state *state, u32 *bandwidth)
 void a867_mxl5007t_release(struct mxl5007t_state *state)
 {
 	if( state ) {
+		if( state->tab_init ) kfree(state->tab_init);
+		if( state->tab_init_cable ) kfree(state->tab_init_cable);
+		if( state->tab_rftune ) kfree(state->tab_rftune);
 		state->config->state = NULL;
 		kfree(state);
 	}
@@ -644,28 +648,25 @@ fail:
 void a867_mxl5007t_attach(struct mxl5007t_config *cfg)
 {
 	struct mxl5007t_state *state;
-	int instance, ret;
 
 	state = kzalloc(sizeof(struct mxl5007t_state), GFP_KERNEL);
 	if( state == NULL ) return;
 
-	state->config = cfg;
-
 	mutex_init(&state->lock);
 
-	ret = mxl5007t_get_chip_id(state);
-	/* check return value of mxl5007t_get_chip_id */
-	if (mxl_fail(ret)) {
-		//show something
-		a867_mxl5007t_release(state);
-		return;
-	}
-
+	state->config = cfg;
 	cfg->state = state;
-	state->tab_init = init_tab;
-	state->tab_init_cable = init_tab_cable;
-	state->tab_rftune = reg_pair_rftune;
+	state->tab_init = kzalloc(sizeof(init_tab), GFP_KERNEL);
+	if( !state->tab_init ) goto error;
 
+	state->tab_init_cable = kzalloc(sizeof(init_tab_cable), GFP_KERNEL);
+	if( !state->tab_init_cable ) goto error;
+
+	state->tab_rftune = kzalloc(sizeof(reg_pair_rftune), GFP_KERNEL);
+	if( !state->tab_rftune ) goto error;
+	return;
+error:
+	printk("fail to allocate memory\n");
 	return;
 }
 

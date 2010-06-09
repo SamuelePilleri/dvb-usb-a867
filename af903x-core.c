@@ -3,11 +3,10 @@
 
 DEVICE_CONTEXT DC;
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,25) //s011
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,25)
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 #endif
 
-//s001+s
 static int map_gpio_by_id(const struct usb_device_id *id, PDEVICE_CONTEXT pdc)
 {
 	if( id->idProduct == 0xa333 ) {
@@ -75,14 +74,12 @@ static int map_gpio_by_id(const struct usb_device_id *id, PDEVICE_CONTEXT pdc)
 		pdc->Map.GPIO_STR_o   = 0xF000;
 		pdc->Map.GPIO_STR_i   = 0xF000;
 	}
-//j001+s
 	else if(id->idProduct == 0xa337 
-/*j003*/ || id->idProduct == 0x0337 
-/*j003*/ || id->idProduct == 0xa867 
-/*s034*/ || id->idProduct == 0x0867 
-/*s034*/ || id->idProduct == 0x1867)
-	{
-		deb_data("GPIO Mapping : A337\n");
+		|| id->idProduct == 0x0337 
+		|| id->idProduct == 0xa867 
+		|| id->idProduct == 0x0867 
+		|| id->idProduct == 0x1867) {
+		deb_data("GPIO Mapping : A867\n");
 		pdc->Map.I2C_SLAVE_ADDR = 0x3A;
 		pdc->Map.RF_SW_HOST = 0; //chip1
 		pdc->Map.GPIO_UHF_en = 0xF000;
@@ -113,14 +110,10 @@ static int map_gpio_by_id(const struct usb_device_id *id, PDEVICE_CONTEXT pdc)
 		pdc->Map.GPIO_STR_on  = 0xF000;
 		pdc->Map.GPIO_STR_o   = 0xF000;
 		pdc->Map.GPIO_STR_i   = 0xF000;
-//j009+s
-// The 3 GPIO setting is unused.
 		pdc->Map.GPIO_LED_en = p_reg_top_gpioh3_en;	
 		pdc->Map.GPIO_LED_on = p_reg_top_gpioh3_on;
 		pdc->Map.GPIO_LED_o  = p_reg_top_gpioh3_o;
-//j009+e
 	}
-//j001+e
 	else {
 		pdc->Map.I2C_SLAVE_ADDR = 0x3E;
 		pdc->Map.RF_SW_HOST = 1; //chip1
@@ -155,7 +148,6 @@ static int map_gpio_by_id(const struct usb_device_id *id, PDEVICE_CONTEXT pdc)
 	}
 	return 0;
 }
-//s001+e
 
 static int af903x_probe(struct usb_interface *intf,
 		const struct usb_device_id *id)
@@ -167,37 +159,35 @@ static int af903x_probe(struct usb_interface *intf,
 	map_gpio_by_id(id, &DC);
 
 	deb_data("===af903x usb device pluged in!! ===\n");
-	retval = Device_init(interface_to_usbdev(intf),intf/*s005*/,&DC, true);
+	retval = Device_init(interface_to_usbdev(intf),intf,&DC, true);
 	if (retval){
                 if(retval) deb_data("Device_init Fail: 0x%08x\n", retval);
         }
 	
 	for (i = 0; i < af903x_device_count; i++) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,25) //s011+s
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,25)
 		if (dvb_usb_device_init(intf, &af903x_properties[i], THIS_MODULE, NULL, adapter_nr) == 0)
 #else
 		if (dvb_usb_device_init(intf, &af903x_properties[i], THIS_MODULE, NULL) == 0)
-#endif //s011+e
+#endif
 			{deb_data("dvb_usb_device_init success!!\n");return 0;}
 	}
 
 	return -ENOMEM;
 }
 
-static int af903x_suspend(struct usb_interface *intf, pm_message_t message /*s005, u32 state*/)
+static int af903x_suspend(struct usb_interface *intf, pm_message_t message)
 {
 	int error;
 	deb_data("Enter %s Function, message=0x%x\n",__FUNCTION__, message);
 	error = DL_ApCtrl(0);
 	if (error) deb_data("DL_ApCtrl error : 0x%x\n", error);
 
-//s031+s
 // If selective suspend is not supported, this must be a S3/S4 suspend,
 // in which case we choose to reboot AF903x so it can work after resuming on EeePC.
 #if !defined(CONFIG_USB_SUSPEND)
 	DL_Reboot();	
 #endif
-//s031+e
 
 	return 0;
 }
@@ -207,11 +197,10 @@ static int af903x_resume(struct usb_interface *intf)
 	int retval = -ENOMEM;
 	deb_data("Enter %s Function\n",__FUNCTION__);
 	
-	//s005
 	retval = DL_ApCtrl(1);
 	if (retval) deb_data("DL_ApCtrl error : 0x%x\n", retval);
 
-	retval = Device_init(interface_to_usbdev(intf),intf/*s005*/,&DC, false);
+	retval = Device_init(interface_to_usbdev(intf),intf,&DC, false);
         if (retval){
                 if(retval) deb_data("Device_init Fail: 0x%08x\n", retval);
         }
@@ -223,24 +212,23 @@ static struct usb_driver af903x_driver = {
 #if LINUX_VERSION_CODE <=  KERNEL_VERSION(2,6,15)
 	.owner = THIS_MODULE,
 #endif
-	.name       = "dvb_usb_a333", //s001
+	.name       = "dvb_usb_A867",
 	.probe      = af903x_probe,
 	.disconnect = dvb_usb_device_exit,
 	.id_table   = af903x_usb_id_table,
 	.suspend    = af903x_suspend,
 	.resume     = af903x_resume,
-#if LINUX_VERSION_CODE >  KERNEL_VERSION(2,6,22) //s005+s
+#if LINUX_VERSION_CODE >  KERNEL_VERSION(2,6,22)
 	.reset_resume = af903x_resume,
-#endif //s005+e
-	.supports_autosuspend = 1, //s005
+#endif
+	.supports_autosuspend = 1,
 };
 
 static int __init af903x_module_init(void)
 {
 	int result;
 
-//	info("%s",__FUNCTION__);
-	printk("AVerMedia A333 driver module V%s loaded.\n", DRIVER_VER); //s001
+	printk("AVerMedia A867 driver module V%s loaded.\n", DRIVER_VER);
 
 	if ((result = usb_register(&af903x_driver))) {
 		err("usb_register failed. Error number %d",result);
@@ -252,13 +240,13 @@ static int __init af903x_module_init(void)
 static void __exit af903x_module_exit(void)
 {
 	usb_deregister(&af903x_driver);
-	printk("AVerMedia A333 driver module V%s unloaded.\n", DRIVER_VER); //s001
+	printk("AVerMedia A867 driver module V%s unloaded.\n", DRIVER_VER);
 }
 
 module_init (af903x_module_init);
 module_exit (af903x_module_exit);
 
-MODULE_AUTHOR("MPD Linux Team"); //s001
-MODULE_DESCRIPTION("AVerMedia A333 Driver"); //s001
+MODULE_AUTHOR("MPD Linux Team");
+MODULE_DESCRIPTION("AVerMedia A867");
 MODULE_VERSION(DRIVER_VER);
 MODULE_LICENSE("GPL");

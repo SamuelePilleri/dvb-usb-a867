@@ -76,7 +76,7 @@ extern int dvb_usb_af903x_debug;
 #if CONFIG_DVB_USB_DEBUG
 #define avprintk(dbg, lvl, fmt, args...) \
 		do { \
-			if( dbg&lvl ) { printk(fmt, ## args); } \
+			printk(fmt, ## args); \
 		} while(0)
 #else
 #define avprintk(dbg, lvl, fmt, args...) do {} while(0)

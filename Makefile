@@ -36,7 +36,7 @@ EXTRA_CFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-parameter \
 		-Wno-switch
 
 a867-objs := af903x-core.o af903x-devices.o af903x-drv.o af903x-fe.o af903x-tuner.o cmd.o standard.o \
-			demodulator.o demodulatorextend.o usb2impl.o user.o mxl5007t.o Maxlinear_MXL5007.o
+			demodulator.o demodulatorextend.o usb2impl.o user.o mxl5007t.o Maxlinear_MXL5007.o Afa_AF9007.o
 obj-m += a867.o
 
 default:

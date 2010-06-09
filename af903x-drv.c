@@ -449,7 +449,6 @@ static DWORD DRV_SetBusTuner(
     
     	dwError = Demodulator_setBusTuner ((Demodulator*) &pdc->Demodulator, busId, tunerId);
 	if (dwError) {deb_data("Demodulator_setBusTuner error\n");return dwError;}
-
 	dwError = Demodulator_getFirmwareVersion ((Demodulator*) &pdc->Demodulator, Processor_LINK, &version);
     	if (version != 0) {
         	pdc->Demodulator.booted = True;
@@ -457,7 +456,6 @@ static DWORD DRV_SetBusTuner(
     	else {
         	pdc->Demodulator.booted = False;
     	}
-
     	return(dwError); 
 }
 
@@ -539,7 +537,6 @@ DWORD A333TunerPowerControl(
 }
 //j003+e
 
-//j003+s, power control sequence for A337/A867
 DWORD A337TunerPowerControl(
 	PDEVICE_CONTEXT pdc,	
 	BYTE    ucSlaveDemod,

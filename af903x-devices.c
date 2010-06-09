@@ -332,7 +332,7 @@ struct dvb_usb_device_properties af903x_properties[] = {
 				{ NULL },
 			},
 //j001+s, add an device entry
-			{   "AVerMedia A867/A337 DVB-T Recevier",  
+			{   "AVerMedia A867 DVB-T Recevier",  
 				{ &af903x_usb_id_table[2]
 				 ,&af903x_usb_id_table[3]	//j003
 				 ,&af903x_usb_id_table[4]	//j003

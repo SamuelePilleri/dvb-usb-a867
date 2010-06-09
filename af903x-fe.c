@@ -578,7 +578,7 @@ static void af903x_release(struct dvb_frontend *demod)
 
 static struct dvb_frontend_ops af903x_ops = {
 	.info = {
-		.name = "A333/A337 USB DVB-T",
+		.name = "A867 USB DVB-T",
 		.type = FE_OFDM,
 		.frequency_min      = A333_FREQ_MIN, //s024, 44250000,
 		.frequency_max      = A333_FREQ_MAX, //s024, 867250000,

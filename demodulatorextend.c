@@ -11,6 +11,7 @@
 #include "cmd.h"
 
 #include "Maxlinear_MXL5007.h"
+#include "Afa_AF9007.h"
 
 static PidInfo pidInfo;
 BusDescription busDesc[] =
@@ -232,18 +233,21 @@ Dword Demodulator_setBusTuner (
     ganymede = (Ganymede*) demodulator;
     ganymede->cmdDescription = &cmdDesc[busId];
     ganymede->busId = busId;
-    if( 0xff==tunerId ) tunerId = Tuner_Maxlinear_MXL5007; //todo ??
 
-	switch(tunerId) {
-	case Tuner_Maxlinear_MXL5007:
-		ganymede->tunerDescription = &tuner_MXL5007;
-		break;
+    switch(tunerId) {
+    case Tuner_Afatech_AF9007:
+	ganymede->tunerDescription = &tuner_AF9007;
+	break;
 
-	default:
-		error = Error_INVALID_TUNER_TYPE;
-		goto exit;
-		break;
-	}
+    case Tuner_Maxlinear_MXL5007:
+	ganymede->tunerDescription = &tuner_MXL5007;
+	break;
+
+    default:
+	error = Error_INVALID_TUNER_TYPE;
+	goto exit;
+	break;
+    }
 
     if (ganymede->tunerDescription->tunerScript == NULL) {
         ganymede->tunerDescription->tunerScript = NULL;
