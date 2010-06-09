@@ -16,6 +16,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * The code is modified to accommodate the AF903x source code on 2010/6/7
  */
 
 #include <linux/i2c.h>
