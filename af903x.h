@@ -12,8 +12,7 @@
 #include <linux/smp_lock.h>
 #include <linux/usb.h>
 #include <asm/uaccess.h>
-// #include "dvb-usb.h"	//j001
-#include <dvb-usb.h>	//j001
+#include <dvb-usb.h>
 #include "af903x-ioctl.h"
 #include "demodulator.h"
 #include "userdef.h"
@@ -23,14 +22,12 @@
 #include <linux/version.h>
 #include "debug.h"
 
-//j016+s
 #define ENABLE_TEST_FUNCTION 0
 #define ENABLE_HW_PID 0
-//j016+e
+
 
 #define ENABLE_READ_REG 0
 
-//s028, disable support for EVB 
 #define SUPPORT_AF903X_EVB	0
 
 //***************** from device.h *****************//
@@ -68,8 +65,8 @@
 #define EEPROM_IF1H        (GANY_ONLY+EEPROM_FLB_OFS+0x30+3)
 #define EEPROM_SHIFT       (0x10)                 //EEPROM Addr Shift for slave front end
 
-#define CHECK_LOCK_LOOPS	(20) //s019, (5)	//s004
-#define USE_MONITOR_TH		1	//s004
+#define CHECK_LOCK_LOOPS	(20)
+#define USE_MONITOR_TH		1
 
 
 extern int dvb_usb_af903x_debug;
@@ -88,7 +85,7 @@ extern int dvb_usb_af903x_debug;
 #define deb_data(fmt, args...)   avprintk(dvb_usb_af903x_debug,0x08,fmt, ## args)
 //#define deb_data(args...)   printk(KERN_NOTICE args)
 
-//s001+s
+
 typedef struct _GPIO_MAPPINGS {
 	unsigned short  I2C_SLAVE_ADDR;
 	unsigned short  RF_SW_HOST;
@@ -120,11 +117,10 @@ typedef struct _GPIO_MAPPINGS {
 	int GPIO_STR_on;
 	int GPIO_STR_o;
 	int GPIO_STR_i;
-	int GPIO_LED_en;	//j009
-	int GPIO_LED_on;	//j009
-	int GPIO_LED_o;		//j009
+	int GPIO_LED_en;
+	int GPIO_LED_on;
+	int GPIO_LED_o;
 } GPIO_MAPPINGS, *PGPIO_MAPPINGS;
-//s001+e
 
 //***************** from device.h *****************//
 typedef struct _TUNER_INFO {
@@ -137,12 +133,12 @@ typedef struct _TUNER_INFO {
 
 } TUNER_INFO, *PTUNER_INFO;
 
-//j013+s
+
 typedef struct  _FILTER_INFO{
     int filternum;
     Bool onoff;
 }  FILTER_INFO;
-//j013+e
+
 
 typedef struct _FILTER_CONTEXT_HW {
     DWORD ulCurrentFrequency;
@@ -161,14 +157,14 @@ typedef struct _FILTER_CONTEXT_HW {
     //BYTE    gucPreShiftIdx;    //move from AF901x.cpp [global variable]    
    // PKSFILTERFACTORY  pFilterFactory;
     int  bEnPID;
-    int ulcPIDs;				//j013
-    FILTER_INFO aulPIDs[32];	//j013
+    int ulcPIDs;
+    FILTER_INFO aulPIDs[32];
     Bool bApOn;
     int bResetTs;
     Byte OvrFlwChk;
     Byte UnLockCount;
 
-    BYTE AVerFlags; //s009
+    BYTE AVerFlags;
 } FILTER_CONTEXT_HW, *PFILTER_CONTEXT_HW;  
 
 typedef struct _DEVICE_CONTEXT {
@@ -217,16 +213,16 @@ typedef struct _DEVICE_CONTEXT {
    
     Bool ForceWrite;
 
-    GPIO_MAPPINGS Map; //s001
+    GPIO_MAPPINGS Map;
 
-    struct semaphore powerLock; //s005
-    int power_use_count; //s005
-    struct semaphore tunerLock; //s005
+    struct semaphore powerLock;
+    int power_use_count;
+    struct semaphore tunerLock;
 
-    unsigned short idVendor; //s005
-    unsigned short idProduct; //s005
+    unsigned short idVendor;
+    unsigned short idProduct;
 
-    struct semaphore regLock; //s013
+    struct semaphore regLock;
 	
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -263,28 +259,28 @@ extern struct dvb_frontend * af903x_attach(u8 TMP);
 extern struct dvb_usb_device_properties af903x_properties[];
 extern struct usb_device_id af903x_usb_id_table[];
 extern struct usb_device *udevs;
-extern struct usb_interface *uintfs; //s005
+extern struct usb_interface *uintfs;
 extern PDEVICE_CONTEXT PDC;
 extern int af903x_device_count;
 
-extern void af903x_start_monitor_thread(struct dvb_frontend *demod); //s004
-extern void af903x_stop_monitor_thread(struct dvb_frontend *demod); //s004
+extern void af903x_start_monitor_thread(struct dvb_frontend *demod);
+extern void af903x_stop_monitor_thread(struct dvb_frontend *demod);
 
-extern DWORD Device_init(struct usb_device *udev, struct usb_interface *uintf/*s005*/, PDEVICE_CONTEXT PDCs, Bool bBoot);
+extern DWORD Device_init(struct usb_device *udev, struct usb_interface *uintf, PDEVICE_CONTEXT PDCs, Bool bBoot);
 extern DWORD DL_ApCtrl (Bool bOn);
 extern DWORD DL_Tuner_SetBW(u8 ucBw);
 extern DWORD DL_Tuner_SetFreq(u32 ucFreq,u8 ucBw);
 extern DWORD DL_ReSetInterval(void);
-extern DWORD DL_GetChannelStat(u32 *ber, u32 *berbits, u32 *ubc); //s003
-extern DWORD DL_GetSignalStrength(u16 *strength); //s003
-extern DWORD DL_GetLocked(Bool *bLock); //s003
-extern DWORD DL_MonitorReception(Bool *bLock); //s004
-extern DWORD DL_IsPsbOverflow(void *handle, Byte ucSlaveDemod, Bool *bPsvOverflow); //s010
-extern DWORD DL_Reboot(void); //s021
-extern DWORD DL_ResetPID(void);					//j004
-extern DWORD DL_AddPID(BYTE index, Pid pid);	//j004
-extern DWORD DL_PIDOnOff(DWORD OnOff);			//j004
-extern DWORD DL_RemovePID(BYTE index, Pid pid);	//j013
+extern DWORD DL_GetChannelStat(u32 *ber, u32 *berbits, u32 *ubc);
+extern DWORD DL_GetSignalStrength(u16 *strength);
+extern DWORD DL_GetLocked(Bool *bLock);
+extern DWORD DL_MonitorReception(Bool *bLock);
+extern DWORD DL_IsPsbOverflow(void *handle, Byte ucSlaveDemod, Bool *bPsvOverflow);
+extern DWORD DL_Reboot(void);
+extern DWORD DL_ResetPID(void);
+extern DWORD DL_AddPID(BYTE index, Pid pid);
+extern DWORD DL_PIDOnOff(DWORD OnOff);
+extern DWORD DL_RemovePID(BYTE index, Pid pid);
 
 #endif
 

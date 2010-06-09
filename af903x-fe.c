@@ -6,27 +6,23 @@
 
 #include "af903x.h"
 #include "dvb_frontend.h"
-#include "standard.h" //s009
+#include "standard.h"
 
-//s024+s
 #define A333_FREQ_MIN	44250000
 #define A333_FREQ_MAX	867250000
-//s024+e
 
-//s026+s
+
+
 static int alwayslock; // default to 0
 module_param(alwayslock, int, 0644);
 MODULE_PARM_DESC(alwayslock, "Whether to always report channel as locked (default:no).");
-//s026+e
-
 
 
 struct af903xm_state {
 	struct dvb_frontend demod;
 	fe_bandwidth_t current_bandwidth;
-	uint32_t current_frequency; //s024
+	uint32_t current_frequency;
 
-	//s004+s
 	struct completion thread_exit;
 	int thread_should_stop;
 	atomic_t thread_created;
@@ -34,12 +30,10 @@ struct af903xm_state {
 	u32 ucblocks;
 	u32 ber;
 	u16 strength;
-	//s004+e
 	
-	int locked; //s019
+	int locked;
 };
 
-//j012+s
 int test_map_snr(u32 snr_data, u32 *snr)
 {
 	Dword error = 0;
@@ -161,9 +155,7 @@ exit:
 	deb_data(" %s Function, SNR = %d -\n",__FUNCTION__, *snr);
 	return error;
 }
-//j012+e
 
-//j008+s
 int test_read_strength_dbm(struct dvb_frontend *demod, u32 *str)
 {
 	
@@ -184,9 +176,8 @@ int test_read_strength_dbm(struct dvb_frontend *demod, u32 *str)
 exit:
 	return dwError;
 }
-//j008+e
 
-//j007+s
+
 int test_read_snr(struct dvb_frontend *demod, u32 *snr_data)
 {
 	Byte check1 = 0x0, check2 = 0x0;
@@ -223,7 +214,7 @@ int test_read_snr(struct dvb_frontend *demod, u32 *snr_data)
 	return 0;
 
 }
-//j007+e
+
 
 
 static int af903x_set_bandwidth(struct dvb_frontend *demod, u8 bw_idx)
@@ -261,7 +252,6 @@ static int af903x_init(struct dvb_frontend *demod)
 	struct af903xm_state *state = demod->demodulator_priv;
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
  
-	//s005
 	ret = usb_autopm_get_interface(uintfs);
 	if(ret) {
 		deb_data("%s calling usb_autopm_get_interface failed with %d\n", __FUNCTION__, ret);
@@ -271,22 +261,19 @@ static int af903x_init(struct dvb_frontend *demod)
 	ret = DL_ApCtrl(1);
 	if(ret) {
 		deb_data("af903x_init Fail: 0x%04X", ret);
-		return -EIO; //s018
+		return -EIO;
 	}
 
-	//s019+s
 	// reset statistics
 	state->ber = 0;
 	state->ucblocks = 0;
 	state->strength = 0;
 	state->locked = 1; 
-	//s019+e
 	
 	// reset values
-	state->current_frequency = 0; //s024
-	state->current_bandwidth = 0; //s024
+	state->current_frequency = 0;
+	state->current_bandwidth = 0;
 
-	//s004
 	af903x_start_monitor_thread(demod);
 
 	deb_data("- Exit %s Function -\n",__FUNCTION__);
@@ -298,16 +285,14 @@ static int af903x_sleep(struct dvb_frontend *demod)
 	int error;
         deb_data("Enter %s Function\n",__FUNCTION__);
 
-	//s004
 	af903x_stop_monitor_thread(demod);
 
         error = DL_ApCtrl(0);
         if (error) {
 		deb_data("%s calling DL_ApCtrl error : 0x%x\n", __FUNCTION__, error);
-		return -EIO; //s018
+		return -EIO;
 	}
 
-	//s005
 	usb_autopm_put_interface(uintfs);	
 
 	deb_data("- Exit %s Function -\n",__FUNCTION__);
@@ -324,8 +309,8 @@ static int af903x_get_frontend(struct dvb_frontend* fe,
 	struct af903xm_state *state = fe->demodulator_priv;
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
-	memset(fep, 0, sizeof(*fep)); //s024
-	fep->frequency = state->current_frequency; //s024
+	memset(fep, 0, sizeof(*fep));
+	fep->frequency = state->current_frequency;
 	fep->inversion = INVERSION_AUTO;
 	fep->u.ofdm.bandwidth = state->current_bandwidth;
 	return 0;
@@ -341,8 +326,7 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
 
-	//s024+s
-#if 1 //s030, re-enable this code //s029+s
+
 	if( fep->frequency < A333_FREQ_MIN || fep->frequency > A333_FREQ_MAX ) {
 		deb_data("- %s freq=%d Hz out of range(%d~%d)-\n",__FUNCTION__, fep->frequency, 
 				A333_FREQ_MIN, A333_FREQ_MAX);
@@ -351,14 +335,7 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 		state->current_frequency = 0;
 		return -EINVAL;
 	}
-#endif //s029+e
-	//s024+e
 
-#if 0 //s023+s
-	if (fep->u.ofdm.bandwidth == 0) fep->u.ofdm.bandwidth=8;
-	if (fep->u.ofdm.bandwidth == 1) fep->u.ofdm.bandwidth=7;
-	if (fep->u.ofdm.bandwidth == 2) fep->u.ofdm.bandwidth=6;
-#else
 	switch(fep->u.ofdm.bandwidth) {
 	case BANDWIDTH_8_MHZ: bw=8; break;
 	case BANDWIDTH_7_MHZ: bw=7; break;
@@ -375,23 +352,18 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 		deb_data("- %s unknown bw value: %d -\n",__FUNCTION__, fep->u.ofdm.bandwidth);
 		return -EINVAL;
 	}
-#endif //s023+e
+
 
 	ch.RF_kHz           = fep->frequency / 1000;
-//s023	ch.Bw               = fep->u.ofdm.bandwidth;
-	ch.Bw               = bw; //s023
+	ch.Bw               = bw;
 	deb_data("- %s freq=%d KHz, bw=%d MHz -\n",__FUNCTION__, ch.RF_kHz,  ch.Bw);
 
 	state->current_bandwidth = fep->u.ofdm.bandwidth;
-	state->current_frequency = fep->frequency; //s024
+	state->current_frequency = fep->frequency;
 
-//s023	af903x_set_bandwidth(fe, fep->u.ofdm.bandwidth);
-//stylontest	af903x_set_bandwidth(fe, bw); //s023
+	ret = af903x_tune(fe, &ch);
 
-//s023	return af903x_tune(fe, &ch);
-	ret = af903x_tune(fe, &ch); //s023
-
-	//s031, start monitor thread if not yet.
+	// start monitor thread if not yet.
 	af903x_start_monitor_thread(fe);
 	
 	return ret;
@@ -402,14 +374,13 @@ static int af903x_read_status(struct dvb_frontend *fe, fe_status_t *stat)
 	DWORD dwError;
 	Bool bLock;
 	struct af903xm_state *state = fe->demodulator_priv;
-	u32	snr_data; //j007
-	u32 str_dbm_data; //j008
-	u32 snr; //j012	
+	u32	snr_data;
+	u32 str_dbm_data;
+	u32 snr;
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
 	*stat = 0;
 
-//s019+s
 #if !USE_MONITOR_TH	
 	{	
 	unsigned long j = (HZ*500)/1000;
@@ -422,14 +393,12 @@ static int af903x_read_status(struct dvb_frontend *fe, fe_status_t *stat)
 		return -EIO;
 	}
 #else
-	//s026+s
 	if( alwayslock ) {
 		bLock = True;
 	}
 	else {
 		bLock = state->locked;
 	}
-	//s026+e
 #endif
 	if( bLock ) {
 		*stat |= FE_HAS_SIGNAL;
@@ -438,24 +407,23 @@ static int af903x_read_status(struct dvb_frontend *fe, fe_status_t *stat)
 		*stat |= FE_HAS_VITERBI;
 		*stat |= FE_HAS_SYNC;
 	}
-//s019+e
 
-	//s030, report unlock if frequency is out of bound
+
+	// report unlock if frequency is out of bound
 	if( 0==state->current_frequency ) {
 		*stat = 0;
 	}
 	
-#if ENABLE_TEST_FUNCTION //j016
-	test_read_snr(fe, &snr_data); 				//j007
-	test_map_snr(snr_data, &snr);				//j012
-	test_read_strength_dbm(fe, &str_dbm_data);	//j008
+#if ENABLE_TEST_FUNCTION
+	test_read_snr(fe, &snr_data);
+	test_map_snr(snr_data, &snr);
+	test_read_strength_dbm(fe, &str_dbm_data);
 #endif
 
 	deb_data("- Exit %s Function, status=0x%x -\n",__FUNCTION__, *stat);
 	return 0;
 }
 
-//s003+s
 static int af903x_read_ubc(struct dvb_frontend *fe, u32* ucblocks)
 {
 	struct af903xm_state *state = fe->demodulator_priv;
@@ -464,7 +432,7 @@ static int af903x_read_ubc(struct dvb_frontend *fe, u32* ucblocks)
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);	
 
-#if !USE_MONITOR_TH //s004
+#if !USE_MONITOR_TH
 	DL_GetChannelStat(NULL, NULL, ucblocks);
 
 	dwError = DL_GetLocked(&bLock);
@@ -476,23 +444,22 @@ static int af903x_read_ubc(struct dvb_frontend *fe, u32* ucblocks)
 	}
 #else
 	if( ucblocks ) *ucblocks = state->ucblocks;
-#endif //0
+#endif
 
 	deb_data("- Exit %s Function, ubc=%d -\n",__FUNCTION__, ucblocks? *ucblocks:-1);
 	return 0;
 }
-//s003+e
+
 
 static int af903x_read_ber(struct dvb_frontend *fe, u32 *ber)
 {
 	struct af903xm_state *state = fe->demodulator_priv;
-	//s003+s
 	DWORD dwError;
 	u32 berbits;
 	Bool bLock;
 	deb_data("- Enter %s Function -\n",__FUNCTION__);	
 
-#if !USE_MONITOR_TH //s004
+#if !USE_MONITOR_TH
 	DL_GetChannelStat(ber, &berbits, NULL);
 
 	// if signal is not locked, fill BER with BER total bits
@@ -504,8 +471,7 @@ static int af903x_read_ber(struct dvb_frontend *fe, u32 *ber)
 	}
 #else
 	if( ber ) *ber = state->ber;
-#endif //0
-	//s003+e
+#endif
 	//
 	deb_data("- Exit %s Function , ber=%d-\n",__FUNCTION__, ber? *ber:(-1));
 	return 0;
@@ -514,12 +480,11 @@ static int af903x_read_ber(struct dvb_frontend *fe, u32 *ber)
 static int af903x_read_signal_strength(struct dvb_frontend *fe, u16 *strength)
 {
 	struct af903xm_state *state = fe->demodulator_priv;
-	//s003+s
 	DWORD dwError;
 	Bool bLock;
 	deb_data("- Enter %s Function -\n",__FUNCTION__);	
 
-#if !USE_MONITOR_TH  //s004
+#if !USE_MONITOR_TH
 	DL_GetSignalStrength(strength);
 
 	dwError = DL_GetLocked(&bLock);
@@ -530,9 +495,7 @@ static int af903x_read_signal_strength(struct dvb_frontend *fe, u16 *strength)
 	}
 #else
 	if( strength ) *strength = state->strength;
-#endif //0
-
-	//s003+e
+#endif
 	
 	deb_data("- Exit %s Function, strength=%d -\n",__FUNCTION__, strength? *strength:-1);	
 	return 0;
@@ -540,13 +503,10 @@ static int af903x_read_signal_strength(struct dvb_frontend *fe, u16 *strength)
 
 static int af903x_read_snr(struct dvb_frontend* fe, u16 *snr)
 {
-#if !ENABLE_READ_REG //jamietest+s
+#if !ENABLE_READ_REG
 	*snr = 0x0000;
-//s018	return 0;
-
-	return -ENOSYS; //s018
+	return -ENOSYS;
 #else
-	
 	Byte value = 0;
 	Dword addr = 0;
 	Dword dwError = 0;
@@ -572,7 +532,7 @@ static void af903x_release(struct dvb_frontend *demod)
 {
 	struct af903xm_state *st = demod->demodulator_priv;
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
-	af903x_stop_monitor_thread(demod); //s004
+	af903x_stop_monitor_thread(demod);
 	kfree(st);
 }
 
@@ -580,8 +540,8 @@ static struct dvb_frontend_ops af903x_ops = {
 	.info = {
 		.name = "A867 USB DVB-T",
 		.type = FE_OFDM,
-		.frequency_min      = A333_FREQ_MIN, //s024, 44250000,
-		.frequency_max      = A333_FREQ_MAX, //s024, 867250000,
+		.frequency_min      = A333_FREQ_MIN,
+		.frequency_max      = A333_FREQ_MAX,
 		.frequency_stepsize = 62500,
 		.caps = FE_CAN_INVERSION_AUTO |
 			FE_CAN_FEC_1_2 | FE_CAN_FEC_2_3 | FE_CAN_FEC_3_4 |
@@ -605,7 +565,7 @@ static struct dvb_frontend_ops af903x_ops = {
 	.read_ber             = af903x_read_ber,
 	.read_signal_strength = af903x_read_signal_strength,
 	.read_snr             = af903x_read_snr,
-	.read_ucblocks	      = af903x_read_ubc, //s003
+	.read_ucblocks	      = af903x_read_ubc,
 };
 
 static struct dvb_frontend_ops af903x_ops;
@@ -622,21 +582,20 @@ struct dvb_frontend * af903x_attach(u8 tmp)
 	demod                   = &st->demod;
 	demod->demodulator_priv = st;
 	memcpy(&st->demod.ops, &af903x_ops, sizeof(struct dvb_frontend_ops));
-	atomic_set(&st->thread_created, 0); //s004
+	atomic_set(&st->thread_created, 0);
 
 	af903x_identify(st); 
 
 	return demod;
 }
-//s012 EXPORT_SYMBOL(af903x_attach);
 
-//s009+s
+
 static Dword Monitor_GPIO8(void)
 {
     Dword error = Error_NO_ERROR;
     Byte PinValue;
 
-    if ( PDC->idProduct!=0xa333 /* only for a333 */ ) {
+    if ( PDC->idProduct!=0xa333 ) {
 	goto exit;
     }
 
@@ -707,14 +666,12 @@ static Dword Monitor_GPIO8(void)
 exit:
     return error;
 }
-//s009+e
 
-//s004+s
 static int af903x_monitor_thread_func(void *data)
 {
 	struct dvb_frontend *demod = data;
 	struct af903xm_state *state = demod? demod->demodulator_priv:NULL;
-	const char *thread_name = "a333_monitor_thread";
+	const char *thread_name = "A867_monitor_thread";
 	unsigned long loopcount = 0;
 	Bool bLock = True;
 
@@ -748,18 +705,13 @@ static int af903x_monitor_thread_func(void *data)
 
 		// monitor lock and return lock status
 		// reacquire channel if lock is lost for quiet a while
-		#if 1 //s015, 0 //s008
-//s019		if( loopcount%4 == 1 ) {
+		#if 1
 			DL_MonitorReception(&bLock);
-			state->locked = bLock? 1:0; //s019
-//s019		}
+			state->locked = bLock? 1:0;
 		#endif //0
 		// obtain statistics
 		// do this every 2 loops, which is 1 second
 		if( loopcount%2 == 1  ) {
-
-//s015			dwError= Demodulator_isLocked((Demodulator*) &PDC->Demodulator, 0, &bLock);
-//s015			if( dwError ) bLock = False;
 			// do not do this if bLock is false, because 
 			//    1. this is not necessary
 			//    2. frequency is not yet set
@@ -774,8 +726,7 @@ static int af903x_monitor_thread_func(void *data)
 				// for signs of signal lock.
 				//if( strength==0 ) strength = 10;
 				
-				strength = (strength*65535/100); //s020
-
+				strength = (strength*65535/100);
 			}
 			else {
 				DL_GetChannelStat(NULL, &berbits, NULL);
@@ -788,34 +739,20 @@ static int af903x_monitor_thread_func(void *data)
 			state->ucblocks = ucblocks;
 			state->strength = strength;
 		}
-
-		//s009
 		// monitor GPIO8
 	        Monitor_GPIO8();
 	}
 
-#if 0 //s019+s, moved to af903x_init, where frontend is first opened
-	// reset statistics
-	state->ber = 0;
-	state->ucblocks = 0;
-	state->strength = 0;
-	state->locked = 1; 
-#endif //s019+e
-
-	//s031+s
 	//Firstly, clear thread_created flag so monitor thead can be restored later.
 	atomic_set(&state->thread_created, 0);
 	//Secondly, clear current frequency so we can depent on later set_frequency to restore
 	//this thread.
 	state->current_frequency = 0;
-	//s031+e
 
 	deb_data("- Exit %s Function -\n",__FUNCTION__);
 	complete_and_exit(&state->thread_exit, 0);
 }
-//s004+e
 
-//s004+s
 void af903x_start_monitor_thread(struct dvb_frontend *demod)
 {
 	struct af903xm_state *st = demod? demod->demodulator_priv:NULL;
@@ -831,9 +768,7 @@ void af903x_start_monitor_thread(struct dvb_frontend *demod)
 #endif //USE_MONITOR_TH
 
 }
-//s004+e
 
-//s004+s
 void af903x_stop_monitor_thread(struct dvb_frontend *demod)
 {
 	struct af903xm_state *st = demod? demod->demodulator_priv:NULL;
@@ -849,8 +784,4 @@ void af903x_stop_monitor_thread(struct dvb_frontend *demod)
 #endif //USE_MONITOR_TH
 	deb_data("- Exit %s Function -\n",__FUNCTION__);
 }
-//s004+e
 
-//MODULE_AUTHOR("Jimmy Chen<jimmy.chen@afatech.com>");
-//MODULE_DESCRIPTION("Driver for the AF903X demodulator");
-//MODULE_LICENSE("GPL");

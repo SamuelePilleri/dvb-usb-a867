@@ -155,7 +155,7 @@ static int af903x_probe(struct usb_interface *intf,
 	int retval = -ENOMEM;
 	int i;
 
-	//s001, init GPIO mappings based on device
+	// init GPIO mappings based on device
 	map_gpio_by_id(id, &DC);
 
 	deb_data("===af903x usb device pluged in!! ===\n");

@@ -230,15 +230,12 @@ Dword Cmd_writeTunerRegisters (
     Dword maxPktSize;
 
     User_enterCriticalSection (demodulator);
-#if 0 //j002, porting from windows n001
-    if (writeBufferLength == 0) goto exit;
-#endif
+
     ganymede = (Ganymede*) demodulator;
     pcmdDesc = ganymede->cmdDescription;
     pbusDesc = pcmdDesc->busDescription;
     maxPktSize = pcmdDesc->mailBoxSize;
 
-// j002+s, porting from windows n001
 	if (writeBufferLength == 0)
 	{
         command = Bus_buildCommand (Command_REG_TUNER_WRITE, Processor_LINK, chip);
@@ -268,7 +265,6 @@ Dword Cmd_writeTunerRegisters (
 
 		goto exit;
 	}
-// j002+e
 
     i = 0;
     while (i < writeBufferLength) {

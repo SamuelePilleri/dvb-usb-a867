@@ -2,7 +2,7 @@
 
 typedef unsigned char		BYTE;						/** At least 1 Byte				*/
 typedef unsigned short		WORD;						/** At least 2 Bytes				*/
-typedef unsigned int/*s006, long*/	DWORD;						/** At least 4 Bytes				*/
+typedef unsigned int		DWORD;						/** At least 4 Bytes				*/
 typedef void *				HANDLE;						/** Pointer to memory location	*/
 
 #define TUNER_REGS_NUM		104

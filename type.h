@@ -35,7 +35,7 @@ typedef unsigned short Word;
 /**
  * The type defination of 32-bits unsigned type.
  */
-typedef unsigned int /*s006, long*/ Dword;
+typedef unsigned int Dword;
 
 
 /**
@@ -47,7 +47,6 @@ typedef short Short;
 /**
  * The type defination of 32-bits signed type.
  */
-//s006 typedef long Long;
 typedef int Long;
 
 
@@ -954,7 +953,7 @@ typedef struct {
     Bool dataReady;
     BurstSize burstSize;
 
-    Byte GPIO8Value[2]; //s009
+    Byte GPIO8Value[2];
 } Ganymede;
 
 

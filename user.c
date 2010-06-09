@@ -91,13 +91,10 @@ Dword User_delay (
      *  return (0);
      */
     //Sleep (dwMs);
-#if 0 //s022+s
-	mdelay(dwMs);
-#else
 	unsigned long j = (HZ*dwMs)/1000;
 	set_current_state(TASK_UNINTERRUPTIBLE);
 	schedule_timeout(j);
-#endif //s022+e
+
 	return (Error_NO_ERROR);
 }
 

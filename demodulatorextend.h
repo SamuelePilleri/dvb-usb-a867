@@ -59,7 +59,7 @@
 #define Tuner_Infineon_TUA9001				0x27
 #define Tuner_Fitipower_FC0011				0x28
 #define Tuner_Afatech_AF9007				0xFF
-#define Tuner_Maxlinear_MXL5007				0xA0	//j002
+#define Tuner_Maxlinear_MXL5007				0xA0
 
 /**
  * Define commands for AGC general set function

@@ -2,7 +2,7 @@
 //#include <math.h>
 #include "cmd.h"
 #include "user.h"
-#include "af903x.h" //s001
+#include "af903x.h"
 
 // turn on/off debug in this file
 #define DEBUG_STANDARD	0
@@ -577,9 +577,7 @@ Dword Standard_readTunerRegisters (
 	ganymede = (Ganymede*) demodulator;
 
 	if (ganymede->cmdDescription->readTunerRegisters != NULL) {
-#if 0	//j002+s
-        error = ganymede->cmdDescription->readTunerRegisters (demodulator, chip, ganymede->tunerDescription->tunerAddress, registerAddress, ganymede->tunerDescription->registerAddressLength, bufferLength, buffer);
-#else	//j002
+
 	if (registerAddress == 0xffff && ganymede->tunerDescription->registerAddressLength == 1)
 	{
 		error = ganymede->cmdDescription->readTunerRegisters (demodulator, chip, 
@@ -591,7 +589,6 @@ Dword Standard_readTunerRegisters (
 		ganymede->tunerDescription->tunerAddress, registerAddress, 
 		ganymede->tunerDescription->registerAddressLength, bufferLength, buffer);
 	}
-#endif	//j002+e
     }
 #endif
 
@@ -2209,11 +2206,7 @@ Dword Standard_initialize (
     /** Write secondary I2C address to device */
     /** it is needed to write i2c address prior to fw-downloading */
     if (ganymede->chipNumber > 1) {
-#if 0 //s001+s	 
-        error = Standard_writeRegister (demodulator, 0, Processor_LINK, 0x417F, User_I2C_ADDRESS);
-#else
-	error = Standard_writeRegister (demodulator, 0, Processor_LINK, 0x417F, ((PDEVICE_CONTEXT)demodulator->userData)->Map.I2C_SLAVE_ADDR);
-#endif //s001+e
+		error = Standard_writeRegister (demodulator, 0, Processor_LINK, 0x417F, ((PDEVICE_CONTEXT)demodulator->userData)->Map.I2C_SLAVE_ADDR);
         if (error) goto exit;
     } else {
         error = Standard_writeRegister (demodulator, 0, Processor_LINK, 0x417F, 0x00);

@@ -1,18 +1,17 @@
 #include "af903x.h"
 
 #define FW_VER         0x08060000
-int dvb_usb_af903x_debug = 255; //s027, enable all level by default
+int dvb_usb_af903x_debug = 255; // enable all level by default
 module_param_named(debug,dvb_usb_af903x_debug, int, 0644);
 MODULE_PARM_DESC(debug, "set debugging level.(info=1,deb_fw=2,deb_fwdata=4,deb_data=8)" DVB_USB_DEBUG_STATUS);
 
 struct usb_device *udevs = NULL;
-struct usb_interface *uintfs = NULL; //s005
+struct usb_interface *uintfs = NULL;
 PDEVICE_CONTEXT PDC;
 
   
 //************** DRV_ *************//
 
-//j004+s
 static DWORD DRV_ResetPID(
     IN	void*	handle,
     IN	BYTE	ucSlaveDemod)
@@ -60,9 +59,7 @@ static DWORD DRV_AddPID(
 
 	return dwError;
 }
-//j004+e
 
-//j013+s
 DWORD DRV_RemovePID(
     IN  void*   handle,
     IN  BYTE    ucSlaveDemod,
@@ -82,7 +79,6 @@ DWORD DRV_RemovePID(
 
 }
 
-//j013+e
 
 
 static DWORD DRV_IrTblDownload(IN      void * handle)
@@ -173,16 +169,15 @@ static DWORD DRV_SetFreqBw(
     if (pdc->fc[ucSlaveDemod].bEnPID)
     {
 		deb_data("		Reset HW PID table\n ");
-//j006        Demodulator_resetPid((Demodulator*) &pdc->Demodulator, ucSlaveDemod);
         //Disable PID filter
 		Demodulator_writeRegisterBits ((Demodulator*) &pdc->Demodulator, ucSlaveDemod, Processor_OFDM, p_mp2if_pid_en, mp2if_pid_en_pos, mp2if_pid_en_len, 0);
 		
     }
 	
-    down(&PDC->tunerLock); //s005
+    down(&PDC->tunerLock);
 
-    PDC->fc[0].AVerFlags &= ~(0x08); //s009
-    PDC->fc[0].AVerFlags |= 0x04; //s009
+    PDC->fc[0].AVerFlags &= ~(0x08);
+    PDC->fc[0].AVerFlags |= 0x04;
     PTI.bSettingFreq = true; //before acquireChannel, it is ture;  otherwise, it is false
 
     if(dwFreq) {
@@ -230,37 +225,16 @@ static DWORD DRV_SetFreqBw(
     }
 
     if(pdc->StreamType == StreamType_DVBT_DATAGRAM) {
-        PDC->fc[ucSlaveDemod].OvrFlwChk = CHECK_LOCK_LOOPS ; //s004, 5
+        PDC->fc[ucSlaveDemod].OvrFlwChk = CHECK_LOCK_LOOPS ;
         PDC->fc[ucSlaveDemod].UnLockCount = 0;
     }
- 
-    #if 0 //s002+s
-    if (pdc->fc[ucSlaveDemod].ulDesiredFrequency!=0 && pdc->fc[ucSlaveDemod].ucDesiredBandWidth!=0)
-    {
-	// patch for Demodulator_isLocked
-	//mdelay(700);
-
-    	dwError= Demodulator_isLocked((Demodulator*) &pdc->Demodulator, ucSlaveDemod, &bLock);
-    	if(dwError)  
-        	deb_data("	Demodulator_isLocked is failed!\n"); 
-    	else 
-	{
-        	deb_data("	The signal is %s Lock\n", bLock?"":"not"); 
-
-		//patch for mce channel change lag
-		if(bLock) {
-			mdelay(500); 
-		}
-    	}
-    }
-    #endif //s002+e
 
     PTI.bTunerOK = true;
 
 exit:
 
     PTI.bSettingFreq = false;
-    up(&PDC->tunerLock); //s005
+    up(&PDC->tunerLock);
 
     return(dwError);  
 }
@@ -352,10 +326,8 @@ ReInit:  //Patch for NIM fail or disappear, Maggie
         deb_data("    Device initialize Ok!!\n");
     }
 
-	//j015+s
 	error = Demodulator_writeRegisterBits ((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, 
 											p_reg_usb_min_len, reg_usb_min_len_pos, reg_usb_min_len_len, 1);
-	//j015+e
 
     Demodulator_getFirmwareVersion ((Demodulator*) &pdc->Demodulator, Processor_OFDM, &cmdVersion);
     deb_data("    FwVer OFDM = 0x%X, ", cmdVersion);
@@ -381,17 +353,9 @@ static DWORD DRV_InitDevInfo(
 
     //For PID Filter Setting
     //PDC->fc[ucSlaveDemod].ulcPIDs = 0;    
-#if 0	//j004+s
-    PDC->fc[ucSlaveDemod].bEnPID = false;
-#else
     PDC->fc[ucSlaveDemod].bEnPID = true;
-#endif 	//j004+e
-
     PDC->fc[ucSlaveDemod].bApOn = false;
-    
     PDC->fc[ucSlaveDemod].bResetTs = false;
-
-
 
     PTI.bTunerOK = false;
     PTI.bSettingFreq = false;
@@ -459,7 +423,7 @@ static DWORD DRV_SetBusTuner(
     	return(dwError); 
 }
 
-//j003+s, power control sequence for A333
+
 DWORD A333TunerPowerControl(
 	PDEVICE_CONTEXT pdc,	
 	BYTE    ucSlaveDemod,
@@ -486,8 +450,6 @@ DWORD A333TunerPowerControl(
     dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_on, 1);
    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_o, 1);
 
-
-	//s005+s
     if(bPowerOn) 
 	{
    		dwError=Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 1); 
@@ -531,11 +493,9 @@ DWORD A333TunerPowerControl(
 			dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 0);
 		}        	
 	}
-	//s005+e
 
 	return dwError;
 }
-//j003+e
 
 DWORD A337TunerPowerControl(
 	PDEVICE_CONTEXT pdc,	
@@ -566,7 +526,7 @@ DWORD A337TunerPowerControl(
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_o, 1); 
 			mdelay(100);
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_o, 1);
-			mdelay(100); // n002
+			mdelay(100);
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_en, 1);
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_on, 1);
 
@@ -577,8 +537,8 @@ DWORD A337TunerPowerControl(
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 0); 
 			mdelay(30);
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 1);
-		//r017e
-			mdelay(300); // n002
+
+			mdelay(300);
 			deb_data("pdc->bTunerPowerOff == true\n");
 			dwError = Demodulator_initialize ((Demodulator*) &pdc->Demodulator, pdc->Demodulator.chipNumber , pdc->Demodulator.bandwidth[0], pdc->StreamType, pdc->architecture);  
 			pdc->bTunerPowerOff = false;
@@ -587,12 +547,9 @@ DWORD A337TunerPowerControl(
 	else //tuner off
 	{
 		// Bugfix: wrong level of tuner i2c whiling plugging in device.
-		dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator); // n002
+		dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
 		if(pdc->bTunerPowerOff == false) 
 		{                
-#if 0 // n002
-			dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-#endif
 			pdc->bTunerPowerOff = true;
 
 			dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 0);
@@ -612,10 +569,8 @@ DWORD A337TunerPowerControl(
 
 	return dwError;
 }
-//j003+e
 
 
-//j003+s, support ID 0x0337 and split the big function by different hardware setting.
 static DWORD DRV_TunerPowerCtrl(
     	void *	handle, 
      	BYTE	ucSlaveDemod,
@@ -635,8 +590,8 @@ static DWORD DRV_TunerPowerCtrl(
 	case 0xa337:	//A337
 	case 0x0337:	//A867
 	case 0xa867:	//A867
-    case 0x0867:    //s034
-    case 0x1867:    //s034
+    case 0x0867:
+    case 0x1867:
 		dwError = A337TunerPowerControl(pdc, ucSlaveDemod, bPowerOn);
 		break;
 	case 0xa333:	//A337 & EVB
@@ -646,219 +601,6 @@ static DWORD DRV_TunerPowerCtrl(
 
 	return dwError;
 }
-//j003+e
-
-#if 0	//j003+s, comment out the big function.
-
-static DWORD DRV_TunerPowerCtrl(
-    	void *	handle, 
-     	BYTE	ucSlaveDemod,
-     	bool		bPowerOn
-)
-{ 
-    DWORD dwError = Error_NO_ERROR;	
-
-    PDEVICE_CONTEXT pdc = (PDEVICE_CONTEXT)handle;
-
-    deb_data("- Enter %s Function , bPowerOn=%d -\n",__FUNCTION__, bPowerOn);
-
-#if 0 //s001+s
-
-    /* init gpioH7 */
-    dwError = Demodulator_writeRegisterBits((Demodulator*) &pdc->Demodulator, 0, Processor_LINK,  p_reg_top_gpioh7_en, reg_top_gpioh7_en_pos, reg_top_gpioh7_en_len, 1);    
-    dwError = Demodulator_writeRegisterBits((Demodulator*) &pdc->Demodulator, 0, Processor_LINK,  p_reg_top_gpioh7_on, reg_top_gpioh7_on_pos, reg_top_gpioh7_on_len, 1);    
-
-
-    if(bPowerOn)
-        PTI.bTunerInited = true;
-    else
-        PTI.bTunerInited = false;    
-
-
-    if(bPowerOn) //tuner on
-    {
-        dwError = Demodulator_writeRegisterBits((Demodulator*) &pdc->Demodulator, 0, Processor_LINK,  p_reg_top_gpioh7_o, reg_top_gpioh7_o_pos, reg_top_gpioh7_o_len, 1);    
- 
-        if(pdc->bTunerPowerOff == true) 
-        {
-            dwError = Demodulator_initialize ((Demodulator*) &pdc->Demodulator, pdc->Demodulator.chipNumber , pdc->Demodulator.bandwidth[0], pdc->StreamType, pdc->architecture);  
-            pdc->bTunerPowerOff = false;
-        }              	        
-    }
-    else //tuner off
-    {
-        if(pdc->architecture == Architecture_PIP)
-        {
-            if(pdc->fc[0].tunerinfo.bTunerInited == false && pdc->fc[1].tunerinfo.bTunerInited == false) 
-            {                                
-                if(pdc->bTunerPowerOff == false) 
-                {
-                    dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-                    pdc->bTunerPowerOff = true;
-                }
-                
-                dwError = Demodulator_writeRegisterBits((Demodulator*) &pdc->Demodulator, 0, Processor_LINK,  p_reg_top_gpioh7_o, reg_top_gpioh7_o_pos, reg_top_gpioh7_o_len, 0);    
-            }                   
-        }
-        else 
-        {
-            if(pdc->bTunerPowerOff == false) 
-            {                
-                dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-                pdc->bTunerPowerOff = true;
-            }      
-
-            dwError = Demodulator_writeRegisterBits((Demodulator*) &pdc->Demodulator, 0, Processor_LINK,  p_reg_top_gpioh7_o, reg_top_gpioh7_o_pos, reg_top_gpioh7_o_len, 0);    
-        }        	
-
-    }
-
-#else
-
-
-	if( 0xa337 != PDC->idProduct ) //j002, if it isn't A337, then use old setting
-	{
-
-    	if(bPowerOn)
-        	PTI.bTunerInited = true;
-	    else
-    	    PTI.bTunerInited = false;    
-
-	    //control oscilator	
-    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_en, 1);
-	    dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_on, 1);
-    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 1); 
-
-	    dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_en, 1);
-    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_on, 1);
-	    dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_o, 1); 
-    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_en, 1);
-	    dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_on, 1);
-    	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_o, 1);
-
-#endif //s001+e
-
-		//s005+s
-
-	    if(bPowerOn) 
-		{
-    		dwError=Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 1); 
-        	dwError=Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_o, 1);
-        	dwError=Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_o, 1);
-
-	        if(pdc->bTunerPowerOff == true) 
-    	    {
-        	    dwError = Demodulator_initialize ((Demodulator*) &pdc->Demodulator, pdc->Demodulator.chipNumber, 
-												pdc->Demodulator.bandwidth[0], pdc->StreamType, pdc->architecture);  
-				pdc->bTunerPowerOff = false;
-			}              	        
-    	}
-		else 
-		{ // power off
-
-			if(pdc->architecture == Architecture_PIP)
-			{
-				if(pdc->fc[0].tunerinfo.bTunerInited == false && pdc->fc[1].tunerinfo.bTunerInited == false) 
-            	{                                
-                	if(pdc->bTunerPowerOff == false) 
-                	{
-                    	dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-	                    pdc->bTunerPowerOff = true;
-    	            }
-                
-        	        dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_o, 0); 
-            	    dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_o, 0);
-    	        	dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 0);
-            	}
-        	}
-	        else 
-    	    {
-        	    if(pdc->bTunerPowerOff == false) 
-            	{                
-                	dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-	                pdc->bTunerPowerOff = true;
-    	        }      
-
-                dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR1_o, 0); 
-                dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_TUR2_o, 0);
-    	        dwError = Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_OSC_o, 0); 
-	        }        	
-		}
-    //s005+e
-	}
-	else	//j002, if it is A337, then do the new setting
-	//j002+s
-	{
-		if(bPowerOn)
-			PTI.bTunerInited = true;
-		else
-			PTI.bTunerInited = false;    
-
-		if(bPowerOn) //tuner on
-		{
-			if(pdc->bTunerPowerOff == true) 
-			{
-				//use variable to control gpio
-
-				// enable tuner power
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_en, 1);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_on, 1);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_en, 1);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_on, 1);
-
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_o, 1); 
-				mdelay(100);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_o, 1);
-				mdelay(100); // n002
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_en, 1);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_on, 1);
-
-				
-				// reset tuner
-				deb_data("A337 reset");
-				mdelay(10);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 0); 
-				mdelay(30);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 1);
-		//r017e
-				mdelay(300); // n002
-				deb_data("pdc->bTunerPowerOff == true");
-				dwError = Demodulator_initialize ((Demodulator*) &pdc->Demodulator, pdc->Demodulator.chipNumber , pdc->Demodulator.bandwidth[0], pdc->StreamType, pdc->architecture);  
-				pdc->bTunerPowerOff = false;
-			}              	        
-		}
-		else //tuner off
-		{
-			// Bugfix: wrong level of tuner i2c whiling plugging in device.
-			dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator); // n002
-			if(pdc->bTunerPowerOff == false) 
-			{                
-#if 0 // n002
-				dwError = Demodulator_finalize((Demodulator*) &pdc->Demodulator);
-#endif
-				pdc->bTunerPowerOff = true;
-
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_o, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_en, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, p_reg_top_gpioh12_on, 0);
-				mdelay(10);
-
-				// disable tuner power
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_o, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_o, 0);
-
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_en, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR1_on, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_en, 0);
-				dwError = Demodulator_writeRegister((Demodulator*) &pdc->Demodulator, 0, Processor_LINK, pdc->Map.GPIO_TUR2_on, 0);
-			}      
-		}   	
-	}
-	//j002+e
-    return(dwError);
-}
-
-#endif //j003+e
 
 static DWORD DRV_ApCtrl (
       void *      handle,
@@ -874,11 +616,10 @@ static DWORD DRV_ApCtrl (
 
       //deb_data("enter DRV_ApCtrl: Demod[%d].GraphBuilt = %d", ucSlaveDemod, pdc->fc[ucSlaveDemod].GraphBuilt); 
 	
-	//j009+s
    	Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_LED_en, 1); 
    	Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_LED_on, 1); 
    	Demodulator_writeRegister((Demodulator*) &PDC->Demodulator, 0, Processor_LINK, PDC->Map.GPIO_LED_o, bOn?1:0); 
-	//j009+e
+
 
 	dwError = DRV_TunerPowerCtrl(handle, ucSlaveDemod, bOn);
        	if(dwError) deb_data("DRV_TunerPowerCtrl Fail: 0x%08x\n", dwError); 
@@ -908,7 +649,6 @@ static DWORD DRV_TunerWakeup(
 
 }
 
-//s021+s
 static DWORD DRV_Reboot(
 	void * handle
 )
@@ -925,7 +665,6 @@ static DWORD DRV_Reboot(
 }
 //s021+e
 
-//s010+s
 static DWORD DRV_IsPsbOverflow(
 	void *	handle,
 	Byte	ucSlaveDemod,
@@ -964,11 +703,9 @@ static DWORD DRV_IsPsbOverflow(
 exit:
 	return dwError;
 }
-//s010+e
 
 //************** DL_ *************//
 //
-//j004+s
 DWORD DL_ResetPID(void)
 {
 	DWORD dwError = Error_NO_ERROR;
@@ -995,9 +732,7 @@ DWORD DL_PIDOnOff(DWORD OnOff)
 
 	return dwError;
 }
-//j004+e
 
-//j013+s
 DWORD DL_RemovePID(
     IN  Byte    index,
     IN  Pid     pid
@@ -1011,9 +746,7 @@ DWORD DL_RemovePID(
     return(dwError);
 }
 
-//j013+e
 
-//s010+s
 DWORD DL_IsPsbOverflow(
 	void *	handle,
 	Byte	ucSlaveDemod,
@@ -1023,9 +756,8 @@ DWORD DL_IsPsbOverflow(
 	DWORD dwError = DRV_IsPsbOverflow(handle, ucSlaveDemod, bPsbOverflow);
 	return dwError;
 }
-//s010+e
 
-//s004+s
+
 DWORD DL_MonitorReception(Bool *lock)
 {
 	DWORD dwError = Error_NO_ERROR;
@@ -1050,15 +782,15 @@ DWORD DL_MonitorReception(Bool *lock)
 	if( dwError!=Error_NO_ERROR ) {
 		goto exit;
 	}
-	//s015+s
+
 	// consider as unlock if UBC is not zero
 	dwError = Demodulator_getChannelStatistic((Demodulator*) &PDC->Demodulator, ucSlaveDemod, &stat);
 	if( dwError!=Error_NO_ERROR ) {
 		goto exit;
 	}
-//s019	if( stat.abortCount ) bLock = False;	
+
 //uncomment this because this causes instability in channel scan.
-	//s015+e
+
 
 	// report lock status
 	if( lock ) *lock = bLock;
@@ -1069,8 +801,7 @@ DWORD DL_MonitorReception(Bool *lock)
 		deb_data("- %s Function end of monitor cycle -\n",__FUNCTION__);
 
 		// if lock is lost for a while, try to reacquire channel
-//s025		if( PDC->fc[ucSlaveDemod].UnLockCount >= CHECK_LOCK_LOOPS-2) {
-		if( PDC->fc[ucSlaveDemod].UnLockCount >= CHECK_LOCK_LOOPS*2/3) { //s025
+		if( PDC->fc[ucSlaveDemod].UnLockCount >= CHECK_LOCK_LOOPS*2/3) {
 			WORD bw = PDC->fc[ucSlaveDemod].ucDesiredBandWidth;
 			DWORD freq = PDC->fc[ucSlaveDemod].ulDesiredFrequency;
 	
@@ -1078,7 +809,6 @@ DWORD DL_MonitorReception(Bool *lock)
 			deb_data("- %s Function need to reacquire channel, freq=%d, bw=%d-\n",__FUNCTION__,
 					freq, bw);
 
-			//s015+s
 			// reacquire channel
 			// first power off, then power on
 			DRV_ApCtrl (PDC, 0, 0);
@@ -1095,7 +825,6 @@ DWORD DL_MonitorReception(Bool *lock)
 			deb_data("- %s Function switch to %d KHz later -\n",__FUNCTION__, freq);
 			Demodulator_acquireChannel ((Demodulator*) &PDC->Demodulator, ucSlaveDemod,
 							bw, freq);
-			//s015+e
 		}	
 
 		// restart monitor cycle
@@ -1118,15 +847,14 @@ exit:
 	up(&PDC->tunerLock);
 	return dwError;
 }
-//s004+e
 
-//s003+s
+
 DWORD DL_GetLocked(Bool *bLock)
 {
 	DWORD dwError;
 	BYTE    ucSlaveDemod=0;
 
-	down(&PDC->tunerLock); //s019
+	down(&PDC->tunerLock);
 
 	if( bLock ) {
 		dwError= Demodulator_isLocked((Demodulator*) &PDC->Demodulator, ucSlaveDemod, bLock);
@@ -1135,12 +863,11 @@ DWORD DL_GetLocked(Bool *bLock)
 		dwError = Error_NULL_PTR;
 	}
 
-	up(&PDC->tunerLock); //s019
+	up(&PDC->tunerLock);
 	return dwError;
 }
-//s003+e
 
-//s003+s
+
 DWORD DL_GetSignalStrength(u16 *strength)
 {
 	DWORD dwError = Error_NO_ERROR;
@@ -1154,9 +881,8 @@ DWORD DL_GetSignalStrength(u16 *strength)
 
 	return dwError;
 }
-//s003+e
 
-//s003+s
+
 DWORD DL_GetChannelStat(u32 *ber, u32 *berbits, u32 *ubc)
 {
 	DWORD dwError = Error_NO_ERROR;
@@ -1172,7 +898,7 @@ DWORD DL_GetChannelStat(u32 *ber, u32 *berbits, u32 *ubc)
 
 	return(dwError);
 }
-//s003+e
+
 
 static DWORD DL_Initialize(
 	    void *      handle
@@ -1255,11 +981,10 @@ DWORD DL_ApCtrl (
 	BYTE    ucSlaveDemod=0;
 	Bool bLock;
 
-	down(&PDC->powerLock); //s005
+	down(&PDC->powerLock);
 
 	deb_data("Enter DL_ApCtrl:  bOn = %s, use_cnt=%d\n", bOn?"ON":"OFF", PDC->power_use_count);
 
-	//s005+s
 	// implement power management based on reference counting
 	if( bOn ) PDC->power_use_count++;
 	else PDC->power_use_count--;
@@ -1269,9 +994,6 @@ DWORD DL_ApCtrl (
 
 		deb_data("DL_ApCtrl: call DRV_ApCtrl(ON)\n");
 	    	dwError = DRV_ApCtrl (PDC, 0, 1);
-
-//s008		DRV_SetFreqBw(PDC, ucSlaveDemod, 533000, 6);
-//s008		Demodulator_isLocked((Demodulator*) &PDC->Demodulator, ucSlaveDemod, &bLock);
 	}
 	else if( !bOn && PDC->power_use_count==0 ) {
 		deb_data("DL_ApCtrl: call DRV_ApCtrl(OFF)\n");
@@ -1281,16 +1003,13 @@ DWORD DL_ApCtrl (
 		PDC->fc[ucSlaveDemod].ucDesiredBandWidth = 0;
 		PDC->fc[ucSlaveDemod].OvrFlwChk = 0;
 	}
-	//s005+e
 
-	up(&PDC->powerLock); //s005
+	up(&PDC->powerLock);
 
 	deb_data("Exit DL_ApCtrl:  bOn = %s, dwError = %d\n", bOn?"ON":"OFF", dwError);
     	return(dwError);
 }
-//EXPORT_SYMBOL(DL_ApCtrl);
 
-//s024+s
 // return 1 if the difference between freq1 & freq2 is smaller or equal than t.
 static inline int Is_Within_Tolerance(u32 freq1, u32 freq2, u32 t)
 {
@@ -1298,7 +1017,7 @@ static inline int Is_Within_Tolerance(u32 freq1, u32 freq2, u32 t)
 	if( diff<=t ) return 1;
 	else return 0;
 }
-//s024+e
+
 
 DWORD DL_Tuner_SetFreq(u32 dwFreq,u8 ucBw)
 {
@@ -1308,7 +1027,7 @@ DWORD DL_Tuner_SetFreq(u32 dwFreq,u8 ucBw)
 	
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
 	if ( (PDC->fc[ucSlaveDemod].ulDesiredFrequency!=dwFreq 
-		&& !Is_Within_Tolerance(PDC->fc[ucSlaveDemod].ulDesiredFrequency, dwFreq, 125) /*s024*/)
+		&& !Is_Within_Tolerance(PDC->fc[ucSlaveDemod].ulDesiredFrequency, dwFreq, 125) )
 			|| PDC->fc[ucSlaveDemod].ucDesiredBandWidth!=ucBw*1000) 
 	 	dwError = DRV_SetFreqBw(PDC, ucSlaveDemod, dwFreq, ucBw);
 	else
@@ -1316,7 +1035,6 @@ DWORD DL_Tuner_SetFreq(u32 dwFreq,u8 ucBw)
 	 
     	return(dwError);	
 }
-//EXPORT_SYMBOL(DL_Tuner_SetFreq);
 
 DWORD DL_Tuner_SetBW(u8 ucBw)
 {
@@ -1330,7 +1048,6 @@ DWORD DL_Tuner_SetBW(u8 ucBw)
 
 	return(dwError);
 }
-//EXPORT_SYMBOL(DL_Tuner_SetBW);
 
 DWORD DL_ReSetInterval(void)
 {
@@ -1339,9 +1056,7 @@ DWORD DL_ReSetInterval(void)
 
          return(dwError);
 }
-//EXPORT_SYMBOL(DL_ReSetInterval);
 
-//s021+s
 DWORD DL_Reboot(void)
 {
 	DWORD dwError = Error_NO_ERROR;
@@ -1352,14 +1067,14 @@ DWORD DL_Reboot(void)
 
 	return(dwError);
 }
-//s021+e
 
-DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf/*s005*/, PDEVICE_CONTEXT PDCs, Bool bBoot)
+
+DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf, PDEVICE_CONTEXT PDCs, Bool bBoot)
 {
 	 DWORD error = Error_NO_ERROR;
 	 BYTE filterIdx=0;
 	 udevs=udev;
-	 uintfs=uintf; //s005
+	 uintfs=uintf;
 	 PDC=PDCs;
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
@@ -1387,22 +1102,20 @@ DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf/*s005*/, P
 		PDC->StreamType = StreamType_DVBT_DATAGRAM;
 		PDC->UsbCtrlTimeOut = 1;
 
-		init_MUTEX(&PDC->powerLock); //s005
-		init_MUTEX(&PDC->tunerLock); //s005
-		PDC->power_use_count = 0; //s005
+		init_MUTEX(&PDC->powerLock);
+		init_MUTEX(&PDC->tunerLock);
+		PDC->power_use_count = 0;
 
-		PDC->idVendor = udev->descriptor.idVendor; //s005
-		PDC->idProduct = udev->descriptor.idProduct; //s005
+		PDC->idVendor = udev->descriptor.idVendor;
+		PDC->idProduct = udev->descriptor.idProduct;
 
-		//s009+s
 		PDC->Demodulator.GPIO8Value[0] = 2;
 		PDC->Demodulator.GPIO8Value[1] = 2;
 
 		PDC->fc[0].AVerFlags = 0x00;
 		PDC->fc[1].AVerFlags = 0x00;
-		//s009+e
 		
-		init_MUTEX(&PDC->regLock); //s013
+		init_MUTEX(&PDC->regLock);
 	}
 	else {
         	PDC->UsbCtrlTimeOut = 5;
@@ -1457,18 +1170,6 @@ DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf/*s005*/, P
         	goto Exit;
     	}
 
-	/*
-	 if (pdc->Demodulator.chipNumber == 2 && !pdc->Demodulator.booted) //plug/cold-boot/S4
-    	{
-        	error = DL_NIMReset(pdc);            
-    	}
-    	else if(pdc->Demodulator.chipNumber == 2 && pdc->Demodulator.booted) //warm-boot/(S1)
-    	{
-        	error = DL_NIMSuspend(pdc, false); 
-		error = DL_TunerWakeup(pdc); //actually for mt2266
-    	}
-	*/
-	
 	if(PDC->Demodulator.chipNumber == 1 && PDC->Demodulator.booted) //warm-boot/(S1)
 	{
 		error = DL_TunerWakeup(PDC);
@@ -1488,46 +1189,16 @@ DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf/*s005*/, P
        	 	if (error) deb_data("DL_IrTblDownload fail");
     	}
 
-   	/* if (pdc->Demodulator.chipNumber == 2)
-    	{
-        	error = DL_USBSetup(pdc);
-        	if (error) CAP_KdPrint(("DRV_SDIOSetup fail!"));
-    	}
-
-    	if (pdc->Demodulator.chipNumber == 2)
-    	{
-        	error = DL_InitNIMSuspendRegs(pdc);
-        	if (error) CAP_KdPrint(("DL_InitNIMSuspendRegs fail!"));
-    	}*/	
-	
     	//for (filterIdx=0; filterIdx< pdc->Demodulator.chipNumber; filterIdx++) 
     	//{  
 		
 
-        	if (bBoot /*s005 || !PDC->fc[filterIdx].GraphBuilt*/ )
+        	if (bBoot)
         	{
 			Bool bLock;
-#if 0 //s008
-			//s005+s
-			DRV_ApCtrl(PDC, filterIdx, 1);
-			DRV_SetFreqBw(PDC, 0, 533000, 6);
-			Demodulator_isLocked((Demodulator*) &PDC->Demodulator, 0, &bLock);
-			//s005+e
-#endif //0
-
             		error = DRV_ApCtrl(PDC, filterIdx, false);
             		if (error) deb_data("%d: DRV_ApCtrl Fail!\n", filterIdx);
         	} 
-    	//}        
-	
-    	/*if(pdc->Demodulator.chipNumber == 2)
-    	{
-       	 if(pdc->fc[0].GraphBuilt==0 && pdc->fc[1].GraphBuilt==0)
-        	{
-            		error = DL_NIMSuspend(pdc, true);            
-            		if(error) CAP_KdPrint(("DL_NIMSuspend fail!"));   
-        	}
-    	}*/
 
 	deb_data("        %s success!! \n",__FUNCTION__);
 

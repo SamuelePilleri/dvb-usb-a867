@@ -1,10 +1,8 @@
 #include "af903x.h"
 
-//j005+s
-int dvb_usb_af903x_hwpid = 1; //s033,0 // enable hw pid filter 
+int dvb_usb_af903x_hwpid = 1; // enable hw pid filter 
 module_param_named(hwpid,dvb_usb_af903x_hwpid, int, 0644); 
 MODULE_PARM_DESC(debug, "set hw pid filter.(disable=0, enable=1)" DVB_USB_DEBUG_STATUS);
-//j005+e
 
 static u16 gSWPIDTable[32];
 static int gTblUsed = 0;
@@ -23,12 +21,12 @@ static int af903x_powerctrl(struct dvb_usb_device *d, int onoff)
 	int ret;
 	deb_data("- Enter %s Function - %s\n",__FUNCTION__,onoff?"ON":"OFF");
 
-	//s005, resume device before DL_ApCtrl(on)
+	// resume device before DL_ApCtrl(on)
 	if( onoff ) {
 		ret = usb_autopm_get_interface(uintfs);
 		if(ret) {
 			deb_data("%s calling usb_autopm_get_interface failed with %d\n", __FUNCTION__, ret);
-			gTblUsed = 0; //j006
+			gTblUsed = 0;
 
 			return ret;
 		}
@@ -37,7 +35,7 @@ static int af903x_powerctrl(struct dvb_usb_device *d, int onoff)
 	ret = DL_ApCtrl(onoff);
 	if(ret) deb_data("	af903x_powerctrl Fail: 0x%04X\n", ret);
 
-	//s005, suspend device after DL_ApCtrl(off)
+	//suspend device after DL_ApCtrl(off)
 	if( !onoff ) {
 		usb_autopm_put_interface(uintfs);	
 	}
@@ -77,92 +75,6 @@ static int af903x_streaming_ctrl(struct dvb_usb_adapter *adap, int onoff)
 
 	return 0;
 }
-
-#if 0 //j013+s
-//j004+s
-static int af903x_pid_filter_ctrl(struct dvb_usb_adapter *adap, int onoff)
-{
-	deb_data("- Enter %s Function - (%d) HW PID Filter for %d\n",__FUNCTION__,onoff, adap->id);
-
-	return 0;
-}
-
-
-static int af903x_pid_filter(struct dvb_usb_adapter *adap, int index, u16 pid, int onoff)
-{
-	Pid mypid;
-	int i =0; //j006
-	
-
-
-	if(onoff)	
-	{
-		deb_data("- Enter %s Function - Add HW PID %d on index %d\n",__FUNCTION__, pid, index);
-#if 0 //j006+s
-		mypid.value = pid;
-
-		if(dvb_usb_af903x_hwpid)	//j005
-		{
-			DL_AddPID(index,mypid);
-		}
-#else
-		gSWPIDTable[index] = pid;
-		gTblUsed++;
-
-#endif //j006+e
-	}
-	else
-	{
-		deb_data("- Enter %s Function - Remove HW PID %d on index %d\n",__FUNCTION__, pid,index);
-		gSWPIDTable[index] = -1;
-		gTblUsed--;
-	}
-
-
-
-	
-	// j006+s, Write SW table to HW table
-	i=0;
-	while(i<gTblUsed)
-	{
-		deb_data("- Index %d to PID ========= %d \n" ,i ,gSWPIDTable[i]);
-	
-		mypid.sectionType = SectionType_TABLE;
-		mypid.table = 0;
-		mypid.duration = 0xff;
-		mypid.frameRow = 0;
-		mypid.priority = 0;
-		mypid.version = 0;
-		mypid.cache = false;
-		mypid.value = gSWPIDTable[i];
-
-		DL_AddPID(i, mypid);
-
-		i++;
-	}
-	
-	// Always add the following PID "0,16,17,18,20,21" to PID table
-	mypid.value = 0;
-	DL_AddPID(31, mypid);
-	mypid.value = 16;
-	DL_AddPID(30, mypid);
-	mypid.value = 17;
-	DL_AddPID(29, mypid);
-	mypid.value = 18;
-	DL_AddPID(28, mypid);
-	mypid.value = 20;
-	DL_AddPID(27, mypid);
-	mypid.value = 21;
-	DL_AddPID(26, mypid);
-
-	msleep(100);
-	//j006+e
-	
-	return 0;
-}
-//j004+e
-
-#else
 
 static int af903x_pid_filter_ctrl(struct dvb_usb_adapter *adap, int onoff)
 {
@@ -255,16 +167,13 @@ static int af903x_pid_filter(struct dvb_usb_adapter *adap, int index, u16 pidnum
 }
 
 
-#endif //j013+e
-
 struct usb_device_id af903x_usb_id_table[] = {
-//s028+s
 		{ USB_DEVICE(0x07ca,0xa333) },
 		{ USB_DEVICE(0x07ca,0xb867) },
-		{ USB_DEVICE(0x07ca,0x1867) },//j001
-		{ USB_DEVICE(0x07ca,0x0337) },//j003
-		{ USB_DEVICE(0x07ca,0xa867) },//j003
-		{ USB_DEVICE(0x07ca,0x0867) },//s034
+		{ USB_DEVICE(0x07ca,0x1867) },
+		{ USB_DEVICE(0x07ca,0x0337) },
+		{ USB_DEVICE(0x07ca,0xa867) },
+		{ USB_DEVICE(0x07ca,0x0867) },
 #if SUPPORT_AF903X_EVB 
 		{ USB_DEVICE(0x15A4,0x1000) },
 		{ USB_DEVICE(0x15A4,0x1001) },
@@ -272,8 +181,7 @@ struct usb_device_id af903x_usb_id_table[] = {
 		{ USB_DEVICE(0x15A4,0x1003) },
 		{ USB_DEVICE(0x15A4,0x9035) },
 #endif //SUPPORT_AF903X_EVB
-//s028+e
-		{ 0 /*s016*/}		/* Terminating entry */
+		{ 0 }		/* Terminating entry */
 };
 MODULE_DEVICE_TABLE(usb, af903x_usb_id_table);
 
@@ -297,16 +205,16 @@ struct dvb_usb_device_properties af903x_properties[] = {
 				.frontend_attach  = af903x_frontend_attach,
 				.tuner_attach     = af903x_tuner_attach,
 				.streaming_ctrl   = af903x_streaming_ctrl,
-				.pid_filter_ctrl  = af903x_pid_filter_ctrl,	//j004, Called to en/disable HW pid filter
-				.pid_filter		  = af903x_pid_filter,		//j004, Called to set/unset a PID for filtering
+				.pid_filter_ctrl  = af903x_pid_filter_ctrl,
+				.pid_filter		  = af903x_pid_filter,
 
 				.stream = { 
 				.type = USB_BULK,
-				.count = 10, //s017, 4
+				.count = 10,
 				.endpoint = 0x84,
 				.u = {
 					.bulk = {
-						.buffersize = (188 * TS_PACKET_COUNT), //j010
+						.buffersize = (188 * TS_PACKET_COUNT),
 						}
 					}
 				}
@@ -318,30 +226,26 @@ struct dvb_usb_device_properties af903x_properties[] = {
 		.num_device_descs = 2,
 #endif
 		.devices = {
-			{   "AVerMedia A333 DVB-T Recevier",  //s007
-//s028+s
+			{   "AVerMedia A333 DVB-T Recevier",
 				{ &af903x_usb_id_table[0]
 				 ,&af903x_usb_id_table[1]
 #if SUPPORT_AF903X_EVB 
-				 ,&af903x_usb_id_table[5]	//jamietest, each time you add new ID, you have to change the value
-				 ,&af903x_usb_id_table[6] 	//jamietest
+				 ,&af903x_usb_id_table[5]
+				 ,&af903x_usb_id_table[6]
 #endif //SUPPORT_AF903X_EVB
-//s028+e
 				},
 
 				{ NULL },
 			},
-//j001+s, add an device entry
 			{   "AVerMedia A867 DVB-T Recevier",  
 				{ &af903x_usb_id_table[2]
-				 ,&af903x_usb_id_table[3]	//j003
-				 ,&af903x_usb_id_table[4]	//j003
-				 ,&af903x_usb_id_table[5]	//s034
+				 ,&af903x_usb_id_table[3]
+				 ,&af903x_usb_id_table[4]
+				 ,&af903x_usb_id_table[5]
 				},
 
 				{ NULL },
 			}
-//j001+e
 		}
 	}
 };

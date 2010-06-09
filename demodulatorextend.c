@@ -587,7 +587,7 @@ exit :
 }
 
 
-#ifdef UNDER_CE //s006, #if
+#ifdef UNDER_CE
 #else
 extern long ActiveSync;
 #endif
@@ -596,8 +596,7 @@ Dword Demodulator_controlActiveSync (
     IN Demodulator* demodulator,
     IN Byte         control
 ) {
-#ifdef UNDER_CE //s006, #if
-//#else
+#ifdef UNDER_CE
     if (control == 0)
         ActiveSync = 0;
     else

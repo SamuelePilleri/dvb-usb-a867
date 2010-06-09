@@ -35,7 +35,7 @@
 
 typedef     unsigned char   tBYTE;      // 1 byte
 typedef     unsigned short  tWORD;      // 2 bytes
-typedef     unsigned int /*s006, long*/   tDWORD;     // 4 bytes
+typedef     unsigned int	tDWORD;     // 4 bytes
 typedef     int             tINT;       // 4 bytes
 typedef     void *          tHANDLE;
 
