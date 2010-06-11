@@ -1,6 +1,8 @@
 
 EXTRA_CFLAGS = -DEXPORT_SYMTAB
 
+dvb-usb-common.h dvb-usb.h dvb_frontend.h
+
 ifneq ($(KOBJ),)
 version := $(shell egrep -e '^VERSION ' $(KSRC)/Makefile | awk 'BEGIN{FS="="}{print $$2}' | tr -d ' ')
 patchlevel := $(shell egrep -e '^PATCHLEVEL ' $(KSRC)/Makefile | awk 'BEGIN{FS="="}{print $$2}' | tr -d ' ')

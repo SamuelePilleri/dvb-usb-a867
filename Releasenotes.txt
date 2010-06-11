@@ -9,28 +9,35 @@
     This driver is released under the GNU GENERAL PUBLIC LICENSE Version 2.
     Please read "LICENSE" file for detailed information.
 
-1. Compile Driver
+1. Compile and install the driver
 
-    To compile the driver against running kernel, simply invoke "make" in the source
-    code directory. Please make sure the build environment is prepared for an
-    out-of-tree module compilation. To do this, check the following folders:
-
-    $ ls -al /lib/modules/`uname -r`/build
-    $ ls -al /lib/modules/`uname -r`/source
-
-    The source folder must contain kernel source code for driver to compile.
-
-2. Load Driver
-
-	1.1 Manually load driver
-
-		load:
-		step1. get the root previlege
-		step2. modprobe dvb-core dvb-pll dvb-usb
-		step3. insmod a867.ko
-
-	1.2 Install driver to system
+	$ tar xjf a867_drv_[version].tar.bz2
+	$ cd a867_drv_[version]
+	$ make
+	$ sudo make install
+	
+	!!! check with the following command to make sure the driver is loaded
+	$ lsmod | grep a867
+	!!! if there is anything wrong, try to
+		a. shutdown the system
+		b. remove the device from system if it was present
+		c. boot the system
+		d. plug in the device
+		e. check with the above command again
 		
-		step1. get the root previlege
-		step2. copy a867.ko to /lib/modules/`uname -r`/kernel/drivers/media/dvb/
-		step3. depmod -a	
+2. DTV applications
+
+	a. Kaffeine (http://kaffeine.kde.org)
+		The driver is tested against Kaffeine under Ubuntu 9.10.
+		We installed the application with the following command.
+
+		$ sudo apt-get install kaffeine xine-ui
+
+	b. MPlayer (http://www.mplayerhq.hu)
+		The driver is also tested against MPlayer under the same
+		system but it requires a prepared channel configuration 
+		(channels.conf) of your location. Please refer to
+		http://www.linuxtv.org/wiki/index.php/Scan for more details.
+		To install MPlayer under Ubuntu, you can do with
+
+		$ sudo apt-get install mplayer
