@@ -51,7 +51,7 @@ default:
 install:
 	@install -d $(DESTDIR)/lib/modules/$(CURRENT)/kernel/drivers/media/dvb/a867
 	$(INSTALL) -c -D -m 644 -c a867.ko $(DESTDIR)/lib/modules/$(CURRENT)/kernel/drivers/media/dvb/a867/
-#	/sbin/depmod -a
+	/sbin/depmod -a
 
 remove:
 
