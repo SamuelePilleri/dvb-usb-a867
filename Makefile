@@ -1,7 +1,9 @@
 
 EXTRA_CFLAGS = -DEXPORT_SYMTAB
 
-dvb-usb-common.h dvb-usb.h dvb_frontend.h
+BUILD_DEP = dvb-usb/dvb-usb-common.h dvb-usb/dvb-usb.h dvb-usb/dvb-usb-ids.h\
+dvb-core/dvb_frontend.h dvb-core/dvbdev.h dvb-core/dmxdev.h dvb-core/dvb_demux.h dvb-core/dvb_net.h dvb-core/demux.h dvb-core/dvb_ringbuffer.h\
+ frontends/dvb-pll.h
 
 ifneq ($(KOBJ),)
 version := $(shell egrep -e '^VERSION ' $(KSRC)/Makefile | awk 'BEGIN{FS="="}{print $$2}' | tr -d ' ')
@@ -41,8 +43,11 @@ a867-objs := af903x-core.o af903x-devices.o af903x-drv.o af903x-fe.o af903x-tune
 			demodulator.o demodulatorextend.o usb2impl.o user.o mxl5007t.o Maxlinear_MXL5007.o Afa_AF9007.o
 obj-m += a867.o
 
+MISSINGFILE := $(shell for i in $(BUILD_DEP); do if [ ! -f $(KSRC)/drivers/media/dvb/$$i ]; then echo $$i; fi; done)
+
 default:
-	make -C $(KSRC) O=$(KOBJ) SUBDIRS=$(PWD) modules
+	@if [ "$(MISSINGFILE)" == "" ]; then make -C $(KSRC) O=$(KOBJ) SUBDIRS=`pwd` modules; else echo Missing files that required to build driver: $(KSRC)/$(MISSINGFILE); fi
+
 install:
 	@install -d $(DESTDIR)/lib/modules/$(CURRENT)/kernel/drivers/media/dvb/a867
 	$(INSTALL) -c -D -m 644 -c a867.ko $(DESTDIR)/lib/modules/$(CURRENT)/kernel/drivers/media/dvb/a867/
