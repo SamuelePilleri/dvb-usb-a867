@@ -1,9 +1,7 @@
 
 EXTRA_CFLAGS = -DEXPORT_SYMTAB
 
-BUILD_DEP = dvb-usb/dvb-usb-common.h dvb-usb/dvb-usb.h dvb-usb/dvb-usb-ids.h\
-dvb-core/dvb_frontend.h dvb-core/dvbdev.h dvb-core/dmxdev.h dvb-core/dvb_demux.h dvb-core/dvb_net.h dvb-core/demux.h dvb-core/dvb_ringbuffer.h\
- frontends/dvb-pll.h
+BUILD_DEP = dvb-usb/dvb-usb-common.h dvb-usb/dvb-usb.h dvb-usb/dvb-usb-ids.h dvb-core/dvb_frontend.h dvb-core/dvbdev.h dvb-core/dmxdev.h dvb-core/dvb_demux.h dvb-core/dvb_net.h dvb-core/demux.h dvb-core/dvb_ringbuffer.h frontends/dvb-pll.h
 
 ifneq ($(KOBJ),)
 version := $(shell egrep -e '^VERSION ' $(KSRC)/Makefile | awk 'BEGIN{FS="="}{print $$2}' | tr -d ' ')
@@ -45,8 +43,14 @@ obj-m += a867.o
 
 MISSINGFILE := $(shell for i in $(BUILD_DEP); do if [ ! -f $(KSRC)/drivers/media/dvb/$$i ]; then echo $$i; fi; done)
 
+ifeq ($(MISSINGFILE),)
 default:
-	@if [ "$(MISSINGFILE)" == "" ]; then make -C $(KSRC) O=$(KOBJ) SUBDIRS=`pwd` modules; else echo Missing files that required to build driver: $(KSRC)/$(MISSINGFILE); fi
+	make -C $(KSRC) O=$(KOBJ) SUBDIRS=`pwd` modules
+else
+default:
+	@echo Missing files that required to build driver: $(KSRC)/drivers/media/dvb/$(MISSINGFILE)
+	@echo Try to get $(CURRENT) kernel source from www.kerneo.org and then copy to $(KSRC)/drivers/media/dvb 
+endif
 
 install:
 	@install -d $(DESTDIR)/lib/modules/$(CURRENT)/kernel/drivers/media/dvb/a867

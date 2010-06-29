@@ -13,6 +13,8 @@
 
 	$ tar xjf a867_drv_[version].tar.bz2
 	$ cd a867_drv_[version]
+	$ ls /lib/modules/`uname -r`/source 
+	!!! Make sure it links to kernel header/kernel tree before moving to next step
 	$ make
 	$ sudo make install
 	
