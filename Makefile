@@ -49,7 +49,7 @@ default:
 else
 default:
 	@echo Missing files that required to build driver: $(KSRC)/drivers/media/dvb/$(MISSINGFILE)
-	@echo Try to get $(CURRENT) kernel source from www.kerneo.org and then copy to $(KSRC)/drivers/media/dvb 
+	@echo Try to get kernel source closest to $(CURRENT) from www.kernel.org and then copy to $(KSRC)/drivers/media/dvb 
 endif
 
 install:

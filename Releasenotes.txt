@@ -1,8 +1,8 @@
-===================================================================================
+================================================================================
    
     AVerMedia A867 Driver Release Notes v1.0.26
 
-===================================================================================
+================================================================================
 
 0. License
 
@@ -14,18 +14,25 @@
 	$ tar xjf a867_drv_[version].tar.bz2
 	$ cd a867_drv_[version]
 	$ ls /lib/modules/`uname -r`/source 
-	!!! Make sure it links to kernel header/kernel tree before moving to next step
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!	Make sure it links to kernel header or kernel tree before moving to   !!
+!!	the next step. It often points to /usr/src/xxxx                       !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	$ make
 	$ sudo make install
 	
-	!!! check with the following command to make sure the driver is loaded
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!	Check with the following command to make sure the driver is loaded    !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	$ lsmod | grep a867
-	!!! if there is anything wrong, try to
-		a. shutdown the system
-		b. remove the device from system if it was present
-		c. boot the system
-		d. plug in the device
-		e. check with the above command again
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!	If there is anything wrong, try to                                    !!
+!!		a. shutdown the system                                        !!
+!!		b. remove the device from system if it was present            !!
+!!		c. boot the system                                            !!
+!!		d. plug in the device                                         !!
+!!		e. check with the above command again                         !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		
 2. DTV applications
 
