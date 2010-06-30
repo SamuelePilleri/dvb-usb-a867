@@ -75,6 +75,7 @@ static int map_gpio_by_id(const struct usb_device_id *id, PDEVICE_CONTEXT pdc)
 		pdc->Map.GPIO_STR_i   = 0xF000;
 	}
 	else if(id->idProduct == 0xa337 
+		|| id->idProduct == 0xF337
 		|| id->idProduct == 0x0337 
 		|| id->idProduct == 0xa867 
 		|| id->idProduct == 0x0867 

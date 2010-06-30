@@ -174,6 +174,7 @@ struct usb_device_id af903x_usb_id_table[] = {
 		{ USB_DEVICE(0x07ca,0x0337) },
 		{ USB_DEVICE(0x07ca,0xa867) },
 		{ USB_DEVICE(0x07ca,0x0867) },
+		{ USB_DEVICE(0x07ca,0xF337) },
 #if SUPPORT_AF903X_EVB 
 		{ USB_DEVICE(0x15A4,0x1000) },
 		{ USB_DEVICE(0x15A4,0x1001) },
@@ -230,8 +231,8 @@ struct dvb_usb_device_properties af903x_properties[] = {
 				{ &af903x_usb_id_table[0]
 				 ,&af903x_usb_id_table[1]
 #if SUPPORT_AF903X_EVB 
-				 ,&af903x_usb_id_table[5]
-				 ,&af903x_usb_id_table[6]
+				 ,&af903x_usb_id_table[7]
+				 ,&af903x_usb_id_table[8]
 #endif //SUPPORT_AF903X_EVB
 				},
 
@@ -242,6 +243,7 @@ struct dvb_usb_device_properties af903x_properties[] = {
 				 ,&af903x_usb_id_table[3]
 				 ,&af903x_usb_id_table[4]
 				 ,&af903x_usb_id_table[5]
+				 ,&af903x_usb_id_table[6]
 				},
 
 				{ NULL },

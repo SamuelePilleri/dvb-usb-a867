@@ -592,6 +592,7 @@ static DWORD DRV_TunerPowerCtrl(
 	case 0xa867:	//A867
     case 0x0867:
     case 0x1867:
+	case 0xF337:
 		dwError = A337TunerPowerControl(pdc, ucSlaveDemod, bPowerOn);
 		break;
 	case 0xa333:	//A337 & EVB

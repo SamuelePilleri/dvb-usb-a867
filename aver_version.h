@@ -1,1 +1,1 @@
-#define DRIVER_VER "1.0.26"
+#define DRIVER_VER "1.0.27"
