@@ -382,7 +382,7 @@ static int af903x_set_frontend(struct dvb_frontend* fe)
 
 
 
-static int af903x_read_status(struct dvb_frontend *fe, fe_status_t *stat)
+static int af903x_read_status(struct dvb_frontend *fe, enum fe_status *stat)
 {
 	DWORD dwError;
 	Bool bLock;
