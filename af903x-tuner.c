@@ -9,13 +9,15 @@
 #define IF2  36150       // IF2 frequency = 36.150 MHz
 #define FREF 16000       // Quartz oscillator 16 MHz
 
-static int tuner_set_params(struct dvb_frontend *fe, struct dvb_frontend_parameters *params)
+static int tuner_set_params(struct dvb_frontend *fe)
 {
+	struct dtv_frontend_properties *params = &fe->dtv_property_cache;
 	struct tuner_priv *priv=NULL;
 	DWORD dwError = Error_NO_ERROR;
 	DWORD freq = params->frequency ;// 1000; // Hz -> kHz
 	
-	priv->bandwidth = (fe->ops.info.type == FE_OFDM) ? params->u.ofdm.bandwidth : 0;
+	priv->bandwidth = (params->delivery_system == SYS_DVBT) ? params->bandwidth_hz : 0;
+	//priv->bandwidth = (fe->ops.info.type == FE_OFDM) ? params->bandwidth_hz : 0;
 
        deb_data("%s - freq : %d , bandwidth : %dn",__FUNCTION__, freq,priv->bandwidth);
 	   
@@ -24,6 +26,8 @@ static int tuner_set_params(struct dvb_frontend *fe, struct dvb_frontend_paramet
 	
 	return 0;
 }
+
+
 static int tuner_get_frequency(struct dvb_frontend *fe, u32 *frequency)
 {
 	struct tuner_priv *priv = fe->tuner_priv;
@@ -70,6 +74,7 @@ static const struct dvb_tuner_ops tuner_tuner_ops = {
 	.sleep         = tuner_sleep,
 
 	.set_params    = tuner_set_params,
+
 	.get_frequency = tuner_get_frequency,
 	.get_bandwidth = tuner_get_bandwidth
 };

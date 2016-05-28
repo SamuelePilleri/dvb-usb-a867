@@ -6,13 +6,16 @@
 #include <linux/list.h>
 #include <linux/module.h>
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0))
+#include <linux/kthread.h>
+#endif
+
 #include "af903x.h"
 #include "dvb_frontend.h"
 #include "standard.h"
-
+#include <linux/dvb/frontend.h>
 #define A333_FREQ_MIN	44250000
 #define A333_FREQ_MAX	867250000
-
 
 
 static int alwayslock; // default to 0
@@ -22,7 +25,7 @@ MODULE_PARM_DESC(alwayslock, "Whether to always report channel as locked (defaul
 
 struct af903xm_state {
 	struct dvb_frontend demod;
-	fe_bandwidth_t current_bandwidth;
+	u32 current_bandwidth;
 	uint32_t current_frequency;
 
 	struct completion thread_exit;
@@ -305,22 +308,28 @@ static int af903x_identify(struct af903xm_state *state)
 	return 0;
 }
 
-static int af903x_get_frontend(struct dvb_frontend* fe,
-				struct dvb_frontend_parameters *fep)
+
+static int af903x_get_frontend(struct dvb_frontend* fe)
 {
+	struct dtv_frontend_properties *fep = &fe->dtv_property_cache;	
 	struct af903xm_state *state = fe->demodulator_priv;
+	u32 delsys;
 
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
+
+	delsys = fep->delivery_system;
 	memset(fep, 0, sizeof(*fep));
+	fep->delivery_system = delsys;
+
 	fep->frequency = state->current_frequency;
 	fep->inversion = INVERSION_AUTO;
-	fep->u.ofdm.bandwidth = state->current_bandwidth;
+	fep->bandwidth_hz = state->current_bandwidth;
 	return 0;
 }
 
-static int af903x_set_frontend(struct dvb_frontend* fe,
-				struct dvb_frontend_parameters *fep)
+static int af903x_set_frontend(struct dvb_frontend* fe)
 {
+	struct dtv_frontend_properties *fep = &fe->dtv_property_cache;
 	struct af903xm_state *state = fe->demodulator_priv;
 	struct af903x_ofdm_channel ch;
 	u16 bw=0;
@@ -338,15 +347,15 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 		return -EINVAL;
 	}
 
-	switch(fep->u.ofdm.bandwidth) {
-	case BANDWIDTH_8_MHZ: bw=8; break;
-	case BANDWIDTH_7_MHZ: bw=7; break;
-	case BANDWIDTH_6_MHZ: bw=6; break;
+	switch(fep->bandwidth_hz) {
+	case 8000000: bw=8; break;
+	case 7000000: bw=7; break;
+	case 6000000: bw=6; break;
 
 	case 6: 
 	case 7:
 	case 8:
-		bw = fep->u.ofdm.bandwidth;
+		bw = fep->bandwidth_hz;
 		deb_data("- %s wrong bw value: %d -\n",__FUNCTION__, fep->u.ofdm.bandwidth);
 		break;
 	default:
@@ -360,7 +369,7 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 	ch.Bw               = bw;
 	deb_data("- %s freq=%d KHz, bw=%d MHz -\n",__FUNCTION__, ch.RF_kHz,  ch.Bw);
 
-	state->current_bandwidth = fep->u.ofdm.bandwidth;
+	state->current_bandwidth = fep->bandwidth_hz;
 	state->current_frequency = fep->frequency;
 
 	ret = af903x_tune(fe, &ch);
@@ -370,6 +379,8 @@ static int af903x_set_frontend(struct dvb_frontend* fe,
 	
 	return ret;
 }
+
+
 
 static int af903x_read_status(struct dvb_frontend *fe, fe_status_t *stat)
 {
@@ -539,9 +550,10 @@ static void af903x_release(struct dvb_frontend *demod)
 }
 
 static struct dvb_frontend_ops af903x_ops = {
+	.delsys = { SYS_DVBT },
 	.info = {
 		.name = "A867 USB DVB-T",
-		.type = FE_OFDM,
+		//.type = FE_OFDM,
 		.frequency_min      = A333_FREQ_MIN,
 		.frequency_max      = A333_FREQ_MAX,
 		.frequency_stepsize = 62500,
@@ -590,7 +602,7 @@ struct dvb_frontend * af903x_attach(u8 tmp)
 
 	return demod;
 }
-
+//EXPORT_SYMBOL(af903x_attach);
 
 static Dword Monitor_GPIO8(void)
 {
@@ -688,7 +700,10 @@ static int af903x_monitor_thread_func(void *data)
 	sigfillset(&current->blocked);
 	sprintf(current->comm, "%s", thread_name);
 #else
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
 	daemonize("%s", thread_name);
+#endif
 	allow_signal(SIGTERM);
 #endif
 	siginitsetinv(&current->blocked, sigmask(SIGKILL)|sigmask(SIGINT)|\
@@ -769,7 +784,11 @@ void af903x_start_monitor_thread(struct dvb_frontend *demod)
 	if( atomic_add_unless(&st->thread_created, 1, 1) ) {
 		st->thread_should_stop = 0;
 		init_completion(&st->thread_exit); 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
 		kernel_thread(af903x_monitor_thread_func, st, 0);
+#else
+                kthread_run(af903x_monitor_thread_func, st, "af903x_monitor");
+#endif
 	}
 #endif //USE_MONITOR_TH
 
