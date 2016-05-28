@@ -28,7 +28,7 @@ INSTALL := $(shell which install)
 DEPMOD  := $(shell which depmod || which /sbin/depmod || echo "true You should now run depmod")
 
 # SYSTEM DVB setting
-ifeq (,$(wildcard $(KSRC)/drivers/media/dvb/.))
+ifneq (,$(wildcard $(KSRC)/drivers/media/dvb/.))
 BUILD_DEP = dvb/dvb-usb/dvb-usb-common.h dvb/dvb-usb/dvb-usb.h dvb/dvb-usb/dvb-usb-ids.h dvb/dvb-core/dvb_frontend.h dvb/dvb-core/dvbdev.h dvb/dvb-core/dmxdev.h dvb/dvb-core/dvb_demux.h dvb/dvb-core/dvb_net.h dvb/dvb-core/demux.h dvb/dvb-core/dvb_ringbuffer.h dvb/frontends/dvb-pll.h
 
 MISSINGFILE := $(shell for i in $(BUILD_DEP); do if [ ! -f $(KSRC)/drivers/media/$$i ]; then echo $$i; fi; done)
