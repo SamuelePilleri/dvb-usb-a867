@@ -1103,20 +1103,25 @@ DWORD Device_init(struct usb_device *udev,struct usb_interface *uintf, PDEVICE_C
 		PDC->StreamType = StreamType_DVBT_DATAGRAM;
 		PDC->UsbCtrlTimeOut = 1;
 
+#if     LINUX_VERSION_CODE > KERNEL_VERSION(2,6,36)
+		sema_init(&PDC->powerLock, 1);
+		sema_init(&PDC->tunerLock, 1);
+		sema_init(&PDC->regLock, 1);
+#else	//LINUX_VERSION_CODE > KERNEL_VERSION(2,6,36)
 		init_MUTEX(&PDC->powerLock);
 		init_MUTEX(&PDC->tunerLock);
-		PDC->power_use_count = 0;
+		init_MUTEX(&PDC->regLock);
+#endif	//LINUX_VERSION_CODE > KERNEL_VERSION(2,6,36)
 
-		PDC->idVendor = udev->descriptor.idVendor;
-		PDC->idProduct = udev->descriptor.idProduct;
+		PDC->power_use_count = 0;
+		PDC->idVendor = le16_to_cpu(udev->descriptor.idVendor);
+		PDC->idProduct = le16_to_cpu(udev->descriptor.idProduct);
 
 		PDC->Demodulator.GPIO8Value[0] = 2;
 		PDC->Demodulator.GPIO8Value[1] = 2;
 
 		PDC->fc[0].AVerFlags = 0x00;
 		PDC->fc[1].AVerFlags = 0x00;
-		
-		init_MUTEX(&PDC->regLock);
 	}
 	else {
         	PDC->UsbCtrlTimeOut = 5;

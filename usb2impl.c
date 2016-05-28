@@ -1,11 +1,18 @@
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 33)  
 #include <linux/autoconf.h>
+#else
+#include <generated/autoconf.h>
+#endif
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/kref.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 #include <linux/smp_lock.h>
+#endif
 #include <linux/usb.h>
 #include <asm/uaccess.h>
 #include <linux/device.h>

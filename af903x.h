@@ -9,7 +9,10 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/kref.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 #include <linux/smp_lock.h>
+#endif
 #include <linux/usb.h>
 #include <asm/uaccess.h>
 #include <dvb-usb.h>
@@ -19,7 +22,6 @@
 #include "firmware.h"
 #include "type.h"
 #include "Common.h"
-#include <linux/version.h>
 #include "debug.h"
 
 #define ENABLE_TEST_FUNCTION 0
@@ -73,7 +75,7 @@ extern int dvb_usb_af903x_debug;
 #if CONFIG_DVB_USB_DEBUG
 #define avprintk(dbg, lvl, fmt, args...) \
 		do { \
-			printk(fmt, ## args); \
+			if( dbg&lvl ) { printk(fmt, ## args); } \
 		} while(0)
 #else
 #define avprintk(dbg, lvl, fmt, args...) do {} while(0)
@@ -125,7 +127,7 @@ typedef struct _GPIO_MAPPINGS {
 //***************** from device.h *****************//
 typedef struct _TUNER_INFO {
 
-    Bool bTunerInited;
+    bool bTunerInited;
     Bool bSettingFreq;
     BYTE TunerId;
     Bool bTunerOK;
@@ -205,7 +207,7 @@ typedef struct _DEVICE_CONTEXT {
     Bool bDCAPIP;
     Bool bSwapFilter;
     Byte FilterCnt;
-    Bool  bTunerPowerOff;
+    bool  bTunerPowerOff;
     //PKSPIN PinSave;
     Byte UsbCtrlTimeOut;
 	

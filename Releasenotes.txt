@@ -1,6 +1,6 @@
 ================================================================================
    
-    AVerMedia A867 Driver Release Notes v1.0.27
+    AVerMedia A867 Driver Release Notes v1.0.28
 
 ================================================================================
 
@@ -10,7 +10,9 @@
     Please read "LICENSE" file for detailed information.
 
 1. Compile and install the driver
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    NOTE: It doesn't work with Linux 2.6.21 and earlier kernel version
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	$ tar xjf a867_drv_[version].tar.bz2
 	$ cd a867_drv_[version]
 	$ ls /lib/modules/`uname -r`/source 
@@ -49,4 +51,16 @@
 		http://www.linuxtv.org/wiki/index.php/Scan for more details.
 		To install MPlayer under Ubuntu, you can do with
 
-		$ sudo apt-get install mplayer
+		$ sudo apt-get install mplaye
+
+3. Change Log
+-------------------
+v1.0.29	2012/05/22
+-------------------
+- kernel v3.2.0 compatible 
+
+-------------------
+v1.0.28	2010/11/10
+-------------------
+- kernel v2.6.35 compatible 
+- Add model 0x3867

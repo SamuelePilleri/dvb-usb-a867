@@ -56,15 +56,24 @@ static int af903x_identify_state(struct usb_device *udev, struct dvb_usb_device_
 static int af903x_frontend_attach(struct dvb_usb_adapter *adap)
 {
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
-	adap->fe = af903x_attach(1);	
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+    adap->fe_adap[0].fe = af903x_attach(1);
+	return adap->fe_adap[0].fe == NULL ? -ENODEV : 0;
+#else
+	adap->fe = af903x_attach(1);
 	return adap->fe == NULL ? -ENODEV : 0;
+#endif
 }
 
 static int af903x_tuner_attach(struct dvb_usb_adapter *adap)
 {
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
-	tuner_attach(adap->fe);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+	tuner_attach(adap->fe_adap[0].fe);
+#else
+    tuner_attach(adap->fe);
+#endif
+
 	return  0;
 }
 
@@ -175,6 +184,7 @@ struct usb_device_id af903x_usb_id_table[] = {
 		{ USB_DEVICE(0x07ca,0xa867) },
 		{ USB_DEVICE(0x07ca,0x0867) },
 		{ USB_DEVICE(0x07ca,0xF337) },
+		{ USB_DEVICE(0x07ca,0x3867) },
 #if SUPPORT_AF903X_EVB 
 		{ USB_DEVICE(0x15A4,0x1000) },
 		{ USB_DEVICE(0x15A4,0x1001) },
@@ -197,6 +207,11 @@ struct dvb_usb_device_properties af903x_properties[] = {
 		.num_adapters = 1,
 		.adapter = {
 			{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+                .num_frontends = 1,
+                .fe = {
+                {
+#endif
 #if ENABLE_HW_PID
 					.caps = DVB_USB_ADAP_HAS_PID_FILTER | DVB_USB_ADAP_NEED_PID_FILTERING,
 #else
@@ -219,7 +234,13 @@ struct dvb_usb_device_properties af903x_properties[] = {
 						}
 					}
 				}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+                }
+            },
+        }
+#else
 			},
+#endif
 		},
 #if 0
 		.num_device_descs = 1,
@@ -244,6 +265,7 @@ struct dvb_usb_device_properties af903x_properties[] = {
 				 ,&af903x_usb_id_table[4]
 				 ,&af903x_usb_id_table[5]
 				 ,&af903x_usb_id_table[6]
+				 ,&af903x_usb_id_table[7]
 				},
 
 				{ NULL },

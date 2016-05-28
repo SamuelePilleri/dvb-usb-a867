@@ -1,8 +1,10 @@
 #include <linux/sched.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 #include <linux/smp_lock.h>
+#endif
 #include <linux/list.h>
 #include <linux/module.h>
-#include <linux/version.h>
 
 #include "af903x.h"
 #include "dvb_frontend.h"
@@ -678,7 +680,9 @@ static int af903x_monitor_thread_func(void *data)
 	deb_data("- Enter %s Function -\n",__FUNCTION__);
 	if( !state ) return -1;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	lock_kernel();
+#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,61)
 	daemonize();
 	sigfillset(&current->blocked);
@@ -689,7 +693,9 @@ static int af903x_monitor_thread_func(void *data)
 #endif
 	siginitsetinv(&current->blocked, sigmask(SIGKILL)|sigmask(SIGINT)|\
 			sigmask(SIGTERM));
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	unlock_kernel();
+#endif
 
 	while(!state->thread_should_stop && !signal_pending(current)) {
 	
