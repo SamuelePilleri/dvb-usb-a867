@@ -81,6 +81,7 @@ remove:
 
 
 clean::
-	-rm -f *~ *.o *.ko .*.o.cmd .*.ko.cmd .*.o.d *.mod.c *.*~ Module.symvers
+	-rm -f *~ *.o *.ko .*.o.cmd .*.ko.cmd .*.o.d *.mod.c *.*~ Module.symvers modules.order
+	-rm -rf .tmp_versions
 
 -include $(KOBJ)/Rules.make
